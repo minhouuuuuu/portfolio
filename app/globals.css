@@ -1,5 +1,50 @@
 @import "tailwindcss";
 
+/* ─── Local fonts ───────────────────────────────────────────── */
+@font-face {
+  font-family: 'PP Monument Extended';
+  src: url('/fonts/PPMonumentExtended-Light.otf') format('opentype');
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Monument Extended';
+  src: url('/fonts/PPMonumentExtended-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Monument Extended';
+  src: url('/fonts/PPMonumentExtended-RegularItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Monument Extended';
+  src: url('/fonts/PPMonumentExtended-Black.otf') format('opentype');
+  font-weight: 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Machina';
+  src: url('/fonts/PPNeueMachina-InktrapLight.otf') format('opentype');
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Machina';
+  src: url('/fonts/PPNeueMachina-InktrapRegular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Machina';
+  src: url('/fonts/PPNeueMachina-InktrapUltrabold.otf') format('opentype');
+  font-weight: 800;
+  font-display: swap;
+}
+
 @theme {
   /* Colors */
   --color-bg: #050505;
@@ -14,9 +59,9 @@
   --color-border: rgba(255, 255, 255, 0.06);
 
   /* Fonts */
-  --font-display: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  --font-body: var(--font-dm-sans), "DM Sans", sans-serif;
-  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+  --font-display: 'PP Monument Extended', sans-serif;
+  --font-body: 'PP Neue Machina', monospace;
+  --font-mono: 'PP Neue Machina', monospace;
 }
 
 :root {
@@ -53,7 +98,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: var(--font-body);
+  font-family: 'PP Neue Machina', monospace;
   overflow-x: hidden;
   cursor: none; /* We have a custom cursor */
 }
