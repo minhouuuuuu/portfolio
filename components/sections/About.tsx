@@ -1,13 +1,9 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "@/components/ui/SplitText";
 import { CountUp } from "@/components/ui/CountUp";
 import { PERSONAL_INFO, STATS } from "@/lib/constants";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -15,27 +11,34 @@ export function About() {
 
   useEffect(() => {
     if (!sectionRef.current) return;
+    let ctx: { revert(): void } | undefined;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        statsRef.current?.children ?? [],
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.15,
-          duration: 0.8,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: statsRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }, sectionRef);
+    Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          statsRef.current?.children ?? [],
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.15,
+            duration: 0.8,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }, sectionRef);
+    });
 
-    return () => ctx.revert();
+    return () => ctx?.revert();
   }, []);
 
   return (
@@ -80,7 +83,7 @@ export function About() {
           splitBy="word"
           trigger="scroll"
           stagger={0.06}
-          className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-12"
+          className="font-display text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-12"
           style={{ fontFamily: "var(--font-display)" }}
         />
 
@@ -112,7 +115,7 @@ export function About() {
             {STATS.map((stat) => (
               <div key={stat.label} className="flex flex-col gap-1">
                 <span
-                  className="font-display text-4xl font-bold"
+                  className="font-display text-4xl font-black"
                   style={{
                     fontFamily: "var(--font-display)",
                     color: "var(--accent)",

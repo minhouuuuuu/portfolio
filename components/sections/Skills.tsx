@@ -1,11 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SKILLS } from "@/lib/constants";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface SkillBarProps {
   name: string;
@@ -18,24 +14,33 @@ function SkillBar({ name, level, index }: SkillBarProps) {
 
   useEffect(() => {
     if (!barRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        barRef.current,
-        { scaleX: 0 },
-        {
-          scaleX: level / 100,
-          duration: 1.2,
-          ease: "expo.out",
-          delay: index * 0.05,
-          scrollTrigger: {
-            trigger: barRef.current,
-            start: "top 90%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
+    let ctx: { revert(): void } | undefined;
+
+    Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          barRef.current,
+          { scaleX: 0 },
+          {
+            scaleX: level / 100,
+            duration: 1.2,
+            ease: "expo.out",
+            delay: index * 0.05,
+            scrollTrigger: {
+              trigger: barRef.current,
+              start: "top 90%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
     });
-    return () => ctx.revert();
+
+    return () => ctx?.revert();
   }, [level, index]);
 
   return (
@@ -109,25 +114,34 @@ export function Skills() {
 
   useEffect(() => {
     if (!sectionRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        titleRef.current?.children ?? [],
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.1,
-          duration: 0.9,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }, sectionRef);
-    return () => ctx.revert();
+    let ctx: { revert(): void } | undefined;
+
+    Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          titleRef.current?.children ?? [],
+          { y: 60, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.1,
+            duration: 0.9,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: titleRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }, sectionRef);
+    });
+
+    return () => ctx?.revert();
   }, []);
 
   return (
@@ -166,13 +180,13 @@ export function Skills() {
             </span>
           </div>
           <h2
-            className="font-display text-5xl md:text-7xl font-bold leading-none uppercase"
+            className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
             style={{ fontFamily: "var(--font-display)" }}
           >
             TECHNICAL
           </h2>
           <h2
-            className="font-display text-5xl md:text-7xl font-bold leading-none uppercase"
+            className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
             style={{
               fontFamily: "var(--font-display)",
               WebkitTextStroke: "1px var(--text)",
@@ -246,7 +260,7 @@ function TechCloud() {
         style={{ boxShadow: "0 0 40px rgba(200,255,0,0.1)" }}
       >
         <span
-          className="font-display text-xl font-bold"
+          className="font-display text-xl font-black"
           style={{ fontFamily: "var(--font-display)", color: "var(--accent)" }}
         >
           NM

@@ -1,10 +1,6 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const SERVICES = [
   {
@@ -241,32 +237,41 @@ function ServiceCard({
 
   useEffect(() => {
     if (!cardRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        cardRef.current,
-        { y: 70, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.9,
-          ease: "expo.out",
-          delay: index * 0.12,
-          scrollTrigger: {
-            trigger: cardRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
+    let ctx: { revert(): void } | undefined;
+
+    Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          cardRef.current,
+          { y: 70, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.9,
+            ease: "expo.out",
+            delay: index * 0.12,
+            scrollTrigger: {
+              trigger: cardRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
     });
-    return () => ctx.revert();
+
+    return () => ctx?.revert();
   }, [index]);
 
   return (
     <div
       ref={cardRef}
       className="group relative flex flex-col overflow-hidden border border-[var(--border)] transition-[border-color] duration-500"
-      style={{ background: "var(--surface)", opacity: 0 }}
+      style={{ background: "var(--surface)" }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLDivElement).style.borderColor =
           service.accent + "55";
@@ -315,7 +320,7 @@ function ServiceCard({
         </div>
 
         <h3
-          className="font-display text-2xl font-bold"
+          className="font-display text-2xl font-black"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {service.title}
@@ -358,25 +363,34 @@ export function Services() {
 
   useEffect(() => {
     if (!sectionRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        headingRef.current?.children ?? [],
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.1,
-          duration: 0.9,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    }, sectionRef);
-    return () => ctx.revert();
+    let ctx: { revert(): void } | undefined;
+
+    Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          headingRef.current?.children ?? [],
+          { y: 60, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.1,
+            duration: 0.9,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: headingRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }, sectionRef);
+    });
+
+    return () => ctx?.revert();
   }, []);
 
   return (
@@ -405,13 +419,13 @@ export function Services() {
             </span>
           </div>
           <h2
-            className="font-display text-5xl md:text-7xl font-bold leading-none uppercase"
+            className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
             style={{ fontFamily: "var(--font-display)" }}
           >
             SERVICES
           </h2>
           <h2
-            className="font-display text-5xl md:text-7xl font-bold leading-none uppercase"
+            className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
             style={{
               fontFamily: "var(--font-display)",
               WebkitTextStroke: "1px var(--text)",

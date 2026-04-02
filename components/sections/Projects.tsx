@@ -1,13 +1,9 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { TiltCard } from '@/components/ui/TiltCard'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { PERSONAL_INFO, PROJECTS } from '@/lib/constants'
-
-gsap.registerPlugin(ScrollTrigger)
 
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -16,67 +12,73 @@ export function Projects() {
 
   useEffect(() => {
     if (!sectionRef.current || !trackRef.current) return
+    let ctx: { revert(): void } | undefined
 
-    const ctx = gsap.context(() => {
-      // Title reveal
-      gsap.fromTo(
-        titleRef.current?.children ?? [],
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.1,
-          duration: 0.9,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          },
-        },
-      )
-
-      // Horizontal scroll
-      const track = trackRef.current!
-      const cards = track.querySelectorAll('.project-card')
-      const totalWidth = track.scrollWidth - window.innerWidth
-
-      gsap.to(track, {
-        x: () => -totalWidth,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: () => `+=${totalWidth + window.innerWidth * 0.5}`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      })
-
-      // Individual card entrance (rotateY)
-      cards.forEach((card, i) => {
+    Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger'),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger)
+      ctx = gsap.context(() => {
+        // Title reveal
         gsap.fromTo(
-          card,
-          { rotateY: 60, opacity: 0 },
+          titleRef.current?.children ?? [],
+          { y: 60, opacity: 0 },
           {
-            rotateY: 0,
+            y: 0,
             opacity: 1,
+            stagger: 0.1,
             duration: 0.9,
             ease: 'expo.out',
             scrollTrigger: {
-              trigger: card,
-              // containerAnimation only accepts Animation type, skip for simplicity
-              start: 'left 90%',
+              trigger: titleRef.current,
+              start: 'top 80%',
               toggleActions: 'play none none reverse',
             },
           },
         )
-      })
-    }, sectionRef)
 
-    return () => ctx.revert()
+        // Horizontal scroll
+        const track = trackRef.current!
+        const cards = track.querySelectorAll('.project-card')
+        const totalWidth = track.scrollWidth - window.innerWidth
+
+        gsap.to(track, {
+          x: () => -totalWidth,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: () => `+=${totalWidth + window.innerWidth * 0.5}`,
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        })
+
+        // Individual card entrance (rotateY)
+        cards.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { rotateY: 60, opacity: 0 },
+            {
+              rotateY: 0,
+              opacity: 1,
+              duration: 0.9,
+              ease: 'expo.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'left 90%',
+                toggleActions: 'play none none reverse',
+              },
+            },
+          )
+        })
+      }, sectionRef)
+    })
+
+    return () => ctx?.revert()
   }, [])
 
   return (
@@ -105,7 +107,7 @@ export function Projects() {
             </span>
           </div>
           <h2
-            className="font-display text-5xl md:text-7xl font-bold leading-none uppercase"
+            className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             PROJECTS
@@ -201,7 +203,7 @@ function ProjectCard({
           {/* Bottom content */}
           <div>
             <h3
-              className="font-display text-3xl font-bold mb-3 uppercase leading-tight"
+              className="font-display text-3xl font-black mb-3 uppercase leading-tight"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               {project.title}
