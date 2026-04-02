@@ -22,27 +22,92 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const BASE_URL = "https://nguyen-minh.dev";
+
 export const metadata: Metadata = {
-  title: "Nguyen Minh — Creative Web Developer",
+  metadataBase: new URL(BASE_URL),
+
+  title: {
+    default: "Nguyen Minh — Creative Web Developer",
+    template: "%s | Nguyen Minh",
+  },
+
   description:
-    "Creative Web Developer specializing in React, Next.js, and immersive web experiences. Currently at IZHAK INTERACT AGENCY in Strasbourg, France.",
-  keywords: ["Creative Developer", "Web Developer", "React", "Next.js", "GSAP", "Three.js", "Animation"],
-  authors: [{ name: "Nguyen Minh" }],
+    "Creative Web Developer specializing in React, Next.js, Three.js, and GSAP. Building immersive digital experiences at IZHAK INTERACT AGENCY in Strasbourg, France.",
+
+  keywords: [
+    "Creative Developer",
+    "Creative Web Developer",
+    "Frontend Developer",
+    "Web Developer",
+    "React Developer",
+    "Next.js Developer",
+    "Three.js",
+    "GSAP",
+    "Framer Motion",
+    "WebGL",
+    "Animation",
+    "Interactive Web",
+    "Strasbourg",
+    "France",
+    "Nguyen Minh",
+  ],
+
+  authors: [{ name: "Nguyen Minh", url: BASE_URL }],
+  creator: "Nguyen Minh",
+  publisher: "Nguyen Minh",
+
+  alternates: {
+    canonical: BASE_URL,
+  },
+
   openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: BASE_URL,
+    siteName: "Nguyen Minh — Creative Web Developer",
     title: "Nguyen Minh — Creative Web Developer",
     description:
-      "Crafting immersive web experiences at the intersection of code and creativity.",
-    url: "https://nguyen-minh.dev",
-    siteName: "Nguyen Minh Portfolio",
-    locale: "en_US",
-    type: "website",
+      "Crafting immersive web experiences at the intersection of code and creativity. React · Three.js · GSAP · Next.js",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Nguyen Minh — Creative Web Developer",
+        type: "image/png",
+      },
+    ],
   },
+
   twitter: {
     card: "summary_large_image",
     title: "Nguyen Minh — Creative Web Developer",
-    description: "Crafting immersive web experiences at the intersection of code and creativity.",
+    description:
+      "Crafting immersive web experiences at the intersection of code and creativity.",
+    images: ["/og-image.png"],
+    creator: "@nguyen__minh",
   },
-  robots: { index: true, follow: true },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+  category: "technology",
+
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
