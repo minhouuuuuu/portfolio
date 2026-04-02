@@ -1,43 +1,44 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { GlitchText } from '@/components/ui/GlitchText'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { PERSONAL_INFO } from '@/lib/constants'
 
-gsap.registerPlugin(ScrollTrigger)
-
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
-  const titleRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!sectionRef.current) return
+    let ctx: { revert(): void } | undefined
 
-    const ctx = gsap.context(() => {
-      // Stagger children
-      gsap.fromTo(
-        contentRef.current?.children ?? [],
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.12,
-          duration: 0.9,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: contentRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
+    Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger'),
+    ]).then(([{ gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger)
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          contentRef.current?.children ?? [],
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.12,
+            duration: 0.9,
+            ease: 'expo.out',
+            scrollTrigger: {
+              trigger: contentRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none reverse',
+            },
           },
-        },
-      )
-    }, sectionRef)
+        )
+      }, sectionRef)
+    })
 
-    return () => ctx.revert()
+    return () => ctx?.revert()
   }, [])
 
   const socials = [
@@ -117,20 +118,20 @@ export function Contact() {
         {/* Giant headline */}
         <div>
           <h2
-            className="font-display font-bold leading-none uppercase"
+            className="font-display font-black leading-none uppercase"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(4rem, 14vw, 12rem)',
+              fontSize: 'clamp(3rem, 10.5vw, 9rem)',
               lineHeight: 0.9,
             }}
           >
             WORK
           </h2>
           <h2
-            className="font-display font-bold leading-none uppercase"
+            className="font-display font-black leading-none uppercase"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(4rem, 14vw, 12rem)',
+              fontSize: 'clamp(3rem, 10.5vw, 9rem)',
               lineHeight: 0.9,
               WebkitTextStroke: '1px var(--text)',
               WebkitTextFillColor: 'transparent',
