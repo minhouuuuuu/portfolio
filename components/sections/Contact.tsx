@@ -13,30 +13,29 @@ export function Contact() {
     if (!sectionRef.current) return
     let ctx: { revert(): void } | undefined
 
-    Promise.all([
-      import('gsap'),
-      import('gsap/ScrollTrigger'),
-    ]).then(([{ gsap }, { ScrollTrigger }]) => {
-      gsap.registerPlugin(ScrollTrigger)
-      ctx = gsap.context(() => {
-        gsap.fromTo(
-          contentRef.current?.children ?? [],
-          { y: 50, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.12,
-            duration: 0.9,
-            ease: 'expo.out',
-            scrollTrigger: {
-              trigger: contentRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
+      ([{ gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger)
+        ctx = gsap.context(() => {
+          gsap.fromTo(
+            contentRef.current?.children ?? [],
+            { y: 50, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              stagger: 0.12,
+              duration: 0.9,
+              ease: 'expo.out',
+              scrollTrigger: {
+                trigger: contentRef.current,
+                start: 'top 80%',
+                toggleActions: 'play none none reverse',
+              },
             },
-          },
-        )
-      }, sectionRef)
-    })
+          )
+        }, sectionRef)
+      },
+    )
 
     return () => ctx?.revert()
   }, [])
@@ -121,7 +120,7 @@ export function Contact() {
             className="font-display font-black leading-none uppercase"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 10.5vw, 9rem)',
+              fontSize: 'clamp(3rem, 10.5vw, 7rem)',
               lineHeight: 0.9,
             }}
           >
@@ -131,7 +130,7 @@ export function Contact() {
             className="font-display font-black leading-none uppercase"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 10.5vw, 9rem)',
+              fontSize: 'clamp(3rem, 10.5vw, 7rem)',
               lineHeight: 0.9,
               WebkitTextStroke: '1px var(--text)',
               WebkitTextFillColor: 'transparent',
