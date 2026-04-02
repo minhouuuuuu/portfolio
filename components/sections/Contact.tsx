@@ -1,21 +1,21 @@
-"use client";
+'use client'
 
-import { useRef, useEffect } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { GlitchText } from "@/components/ui/GlitchText";
-import { MagneticButton } from "@/components/ui/MagneticButton";
-import { PERSONAL_INFO } from "@/lib/constants";
+import { useRef, useEffect } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { GlitchText } from '@/components/ui/GlitchText'
+import { MagneticButton } from '@/components/ui/MagneticButton'
+import { PERSONAL_INFO } from '@/lib/constants'
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger)
 
 export function Contact() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!sectionRef.current) return;
+    if (!sectionRef.current) return
 
     const ctx = gsap.context(() => {
       // Stagger children
@@ -27,31 +27,31 @@ export function Contact() {
           opacity: 1,
           stagger: 0.12,
           duration: 0.9,
-          ease: "expo.out",
+          ease: 'expo.out',
           scrollTrigger: {
             trigger: contentRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
           },
-        }
-      );
-    }, sectionRef);
+        },
+      )
+    }, sectionRef)
 
-    return () => ctx.revert();
-  }, []);
+    return () => ctx.revert()
+  }, [])
 
   const socials = [
-    { label: "Github", href: PERSONAL_INFO.github },
-    { label: "LinkedIn", href: PERSONAL_INFO.linkedin },
-    { label: "Instagram", href: PERSONAL_INFO.instagram },
-  ];
+    { label: 'Github', href: PERSONAL_INFO.github },
+    { label: 'LinkedIn', href: PERSONAL_INFO.linkedin },
+    { label: 'Instagram', href: PERSONAL_INFO.instagram },
+  ]
 
   return (
     <section
       id="contact"
       ref={sectionRef}
       className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "var(--bg)" }}
+      style={{ background: 'var(--bg)' }}
     >
       {/* Animated mesh gradient background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -59,32 +59,32 @@ export function Contact() {
           className="absolute w-[80vw] h-[80vw] rounded-full mesh-gradient"
           style={{
             background:
-              "radial-gradient(circle, rgba(200,255,0,0.04) 0%, transparent 70%)",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
+              'radial-gradient(circle, rgba(200,255,0,0.04) 0%, transparent 70%)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
           }}
         />
         <div
           className="absolute w-[60vw] h-[60vw] rounded-full mesh-gradient"
           style={{
             background:
-              "radial-gradient(circle, rgba(123,97,255,0.04) 0%, transparent 70%)",
-            top: "30%",
-            left: "70%",
-            transform: "translate(-50%, -50%)",
-            animationDelay: "3s",
+              'radial-gradient(circle, rgba(123,97,255,0.04) 0%, transparent 70%)',
+            top: '30%',
+            left: '70%',
+            transform: 'translate(-50%, -50%)',
+            animationDelay: '3s',
           }}
         />
         <div
           className="absolute w-[50vw] h-[50vw] rounded-full mesh-gradient"
           style={{
             background:
-              "radial-gradient(circle, rgba(255,107,53,0.03) 0%, transparent 70%)",
-            top: "70%",
-            left: "20%",
-            transform: "translate(-50%, -50%)",
-            animationDelay: "1.5s",
+              'radial-gradient(circle, rgba(255,107,53,0.03) 0%, transparent 70%)',
+            top: '70%',
+            left: '20%',
+            transform: 'translate(-50%, -50%)',
+            animationDelay: '1.5s',
           }}
         />
       </div>
@@ -96,21 +96,21 @@ export function Contact() {
         {/* Label */}
         <div
           className="flex items-center gap-3 justify-center mb-8"
-          style={{ fontFamily: "var(--font-mono)" }}
+          style={{ fontFamily: 'var(--font-mono)' }}
         >
           <span
             className="inline-block w-6 h-[1px]"
-            style={{ backgroundColor: "var(--text-muted)" }}
+            style={{ backgroundColor: 'var(--text-muted)' }}
           />
           <span
             className="text-xs tracking-[0.3em] uppercase"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: 'var(--text-muted)' }}
           >
             LET&apos;S CREATE
           </span>
           <span
             className="inline-block w-6 h-[1px]"
-            style={{ backgroundColor: "var(--text-muted)" }}
+            style={{ backgroundColor: 'var(--text-muted)' }}
           />
         </div>
 
@@ -119,8 +119,8 @@ export function Contact() {
           <h2
             className="font-display font-bold leading-none uppercase"
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(4rem, 14vw, 12rem)",
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(4rem, 14vw, 12rem)',
               lineHeight: 0.9,
             }}
           >
@@ -129,11 +129,11 @@ export function Contact() {
           <h2
             className="font-display font-bold leading-none uppercase"
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(4rem, 14vw, 12rem)",
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(4rem, 14vw, 12rem)',
               lineHeight: 0.9,
-              WebkitTextStroke: "1px var(--text)",
-              WebkitTextFillColor: "transparent",
+              WebkitTextStroke: '1px var(--text)',
+              WebkitTextFillColor: 'transparent',
             }}
           >
             TOGETHER
@@ -146,8 +146,8 @@ export function Contact() {
             href={`mailto:${PERSONAL_INFO.email}`}
             className="font-mono text-base md:text-lg tracking-wider"
             style={{
-              fontFamily: "var(--font-mono)",
-              color: "var(--text-muted)",
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-muted)',
             }}
           >
             <GlitchText
@@ -168,14 +168,14 @@ export function Contact() {
                 rel="noopener noreferrer"
                 className="font-mono text-sm tracking-widest uppercase relative group"
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-muted)",
+                  fontFamily: 'var(--font-mono)',
+                  color: 'var(--text-muted)',
                 }}
               >
                 {label} ↗
                 <span
                   className="absolute -bottom-1 left-0 h-[1px] w-0 group-hover:w-full transition-all duration-400"
-                  style={{ backgroundColor: "var(--accent)" }}
+                  style={{ backgroundColor: 'var(--accent)' }}
                 />
               </a>
             </MagneticButton>
@@ -185,11 +185,11 @@ export function Contact() {
         {/* Footer */}
         <p
           className="font-mono text-xs tracking-[0.2em] uppercase"
-          style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
+          style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
         >
-          © 2025 Nguyen Minh — Crafted with ♥ & ☕
+          © 2026 Nguyen Minh — Crafted with ❤️
         </p>
       </div>
     </section>
-  );
+  )
 }
