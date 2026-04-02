@@ -119,7 +119,7 @@ export function Projects() {
       <div className="overflow-hidden">
         <div
           ref={trackRef}
-          className="horizontal-scroll-container gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-24 pb-16 pt-4"
+          className="horizontal-scroll-container gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-[max(1.5rem,env(safe-area-inset-right))] pb-16 pt-4"
           style={{ width: 'max-content' }}
         >
           {PROJECTS.map((project, i) => (
@@ -138,7 +138,11 @@ function ProjectCard({
   project: (typeof PROJECTS)[number]
   index: number
 }) {
-  const projectLink = project.link ?? PERSONAL_INFO.portfolio
+  const isComingSoon =
+    'comingSoon' in project && project.comingSoon === true
+  const projectLink = isComingSoon
+    ? null
+    : (project.link ?? PERSONAL_INFO.portfolio)
 
   return (
     <TiltCard className="project-card shrink-0 w-[min(85vw,420px)] h-[520px]">
@@ -215,22 +219,34 @@ function ProjectCard({
               {project.description}
             </p>
 
-            <MagneticButton strength={0.2}>
-              <a
-                href={projectLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 transition-colors duration-300 hover:bg-current group/btn"
+            {isComingSoon || !projectLink ? (
+              <span
+                className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 opacity-50 cursor-default"
                 style={{
                   color: project.color,
                   fontFamily: 'var(--font-mono)',
                 }}
               >
-                <span className="transition-colors duration-300 group-hover/btn:text-(--bg)">
-                  VISIT ↗
-                </span>
-              </a>
-            </MagneticButton>
+                SOON
+              </span>
+            ) : (
+              <MagneticButton strength={0.2}>
+                <a
+                  href={projectLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 transition-colors duration-300 hover:bg-current group/btn"
+                  style={{
+                    color: project.color,
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  <span className="transition-colors duration-300 group-hover/btn:text-(--bg)">
+                    VISIT ↗
+                  </span>
+                </a>
+              </MagneticButton>
+            )}
           </div>
         </div>
       </div>

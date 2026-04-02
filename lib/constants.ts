@@ -67,6 +67,18 @@ export const PROJECTS = [
     color: '#00d4ff',
     image: null,
   },
+  {
+    id: 6,
+    title: 'NEXT DROP',
+    year: 'SOON',
+    tags: ['WIP', 'Ideas', 'Lab'],
+    description:
+      'More wild projects on the way — in the meantime, dive into the Lab.',
+    link: null,
+    comingSoon: true,
+    color: '#e879f9',
+    image: null,
+  },
 ]
 
 export const SKILLS = {
