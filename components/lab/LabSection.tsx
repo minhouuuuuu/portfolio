@@ -20,7 +20,10 @@ const EXPERIMENTS = [
     label: '02 — PHYSICS PARTICLES',
     name: 'PHYSICS PARTICLES',
     stack: 'Matter.js · Canvas 2D · DeviceMotion',
-    hint: { desktop: 'DRAG · THROW · CLICK TO EXPLODE', mobile: 'DRAG TO THROW · TAP TO EXPLODE' },
+    hint: {
+      desktop: 'DRAG · THROW · CLICK TO EXPLODE',
+      mobile: 'DRAG TO THROW · TAP TO EXPLODE',
+    },
   },
   {
     id: 'flowfield',
@@ -88,31 +91,30 @@ export function LabSection() {
     if (!sectionRef.current || !titleRef.current) return
     let ctx: { revert(): void } | undefined
 
-    Promise.all([
-      import('gsap'),
-      import('gsap/ScrollTrigger'),
-    ]).then(([{ gsap }, { ScrollTrigger }]) => {
-      gsap.registerPlugin(ScrollTrigger)
-      gsapRef.current = gsap
-      ctx = gsap.context(() => {
-        gsap.fromTo(
-          Array.from(titleRef.current!.children),
-          { y: 60, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.1,
-            duration: 0.9,
-            ease: 'expo.out',
-            scrollTrigger: {
-              trigger: titleRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
+      ([{ gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger)
+        gsapRef.current = gsap
+        ctx = gsap.context(() => {
+          gsap.fromTo(
+            Array.from(titleRef.current!.children),
+            { y: 60, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              stagger: 0.1,
+              duration: 0.9,
+              ease: 'expo.out',
+              scrollTrigger: {
+                trigger: titleRef.current,
+                start: 'top 80%',
+                toggleActions: 'play none none reverse',
+              },
             },
-          },
-        )
-      }, sectionRef)
-    })
+          )
+        }, sectionRef)
+      },
+    )
 
     return () => ctx?.revert()
   }, [])
@@ -174,16 +176,22 @@ export function LabSection() {
           case 'physics': {
             const { PhysicsParticles } = await import('./PhysicsParticles')
             const inst = new PhysicsParticles(canvas)
-            if (isMobile && typeof window !== 'undefined' && window.DeviceMotionEvent) {
+            if (
+              isMobile &&
+              typeof window !== 'undefined' &&
+              window.DeviceMotionEvent
+            ) {
               setShowGyroBtn(true)
             }
             instanceRef.current = inst
             break
           }
           case 'flowfield': {
-            ;(window as Window & { __labParticleMultiplier?: number }).__labParticleMultiplier =
-              gpuTier < 2 ? 0.3 : 1
-            const { GenerativeFlowField } = await import('./GenerativeFlowField')
+            ;(
+              window as Window & { __labParticleMultiplier?: number }
+            ).__labParticleMultiplier = gpuTier < 2 ? 0.3 : 1
+            const { GenerativeFlowField } =
+              await import('./GenerativeFlowField')
             instanceRef.current = new GenerativeFlowField(canvas, dismissHint)
             break
           }
@@ -226,7 +234,8 @@ export function LabSection() {
           duration: 0.15,
           onComplete: () => {
             if (infoNameRef.current) infoNameRef.current.textContent = exp.name
-            if (infoStackRef.current) infoStackRef.current.textContent = exp.stack
+            if (infoStackRef.current)
+              infoStackRef.current.textContent = exp.stack
             gsap.to([infoNameRef.current, infoStackRef.current], {
               opacity: 1,
               duration: 0.25,
@@ -247,10 +256,17 @@ export function LabSection() {
 
     import('gsap').then(({ gsap }) => {
       tl = gsap.timeline({ repeat: -1, yoyo: true })
-      tl.to(hintRef.current, { opacity: 0.3, y: -8, duration: 1.2, ease: 'sine.inOut' })
+      tl.to(hintRef.current, {
+        opacity: 0.3,
+        y: -8,
+        duration: 1.2,
+        ease: 'sine.inOut',
+      })
     })
 
-    return () => { tl?.kill() }
+    return () => {
+      tl?.kill()
+    }
   }, [showHint])
 
   // Dismiss hint on first canvas interaction
@@ -316,13 +332,16 @@ export function LabSection() {
             className="font-display text-5xl md:text-7xl font-black leading-none uppercase mb-3"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Live experiments.
+            In motions.
           </h2>
 
           {/* Subtitle */}
           <p
             className="font-mono text-sm tracking-wider mb-10"
-            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+            style={{
+              color: 'var(--text-muted)',
+              fontFamily: 'var(--font-mono)',
+            }}
           >
             Touch it. Break it. Make it yours.
           </p>
@@ -340,7 +359,9 @@ export function LabSection() {
                     fontFamily: 'var(--font-mono)',
                     borderColor: isActive ? 'var(--accent)' : 'var(--border)',
                     color: isActive ? 'var(--accent)' : 'var(--text-muted)',
-                    background: isActive ? 'rgba(200,255,0,0.05)' : 'transparent',
+                    background: isActive
+                      ? 'rgba(200,255,0,0.05)'
+                      : 'transparent',
                   }}
                 >
                   {exp.label}
@@ -351,7 +372,13 @@ export function LabSection() {
             {/* Gyro button — physics experiment, mobile only */}
             {showGyroBtn && (
               <button
-                onClick={() => (instanceRef.current as ExperimentInstance & { enableGyro?: () => void })?.enableGyro?.()}
+                onClick={() =>
+                  (
+                    instanceRef.current as ExperimentInstance & {
+                      enableGyro?: () => void
+                    }
+                  )?.enableGyro?.()
+                }
                 className="font-mono text-[10px] md:text-xs tracking-[0.2em] uppercase px-4 py-2.5 border transition-all duration-300"
                 style={{
                   fontFamily: 'var(--font-mono)',
@@ -367,7 +394,13 @@ export function LabSection() {
             {/* Regenerate — flow field only */}
             {activeId === 'flowfield' && (
               <button
-                onClick={() => (instanceRef.current as ExperimentInstance & { regenerate?: () => void })?.regenerate?.()}
+                onClick={() =>
+                  (
+                    instanceRef.current as ExperimentInstance & {
+                      regenerate?: () => void
+                    }
+                  )?.regenerate?.()
+                }
                 className="font-mono text-[10px] md:text-xs tracking-[0.2em] uppercase px-4 py-2.5 border transition-all duration-300 ml-auto"
                 style={{
                   fontFamily: 'var(--font-mono)',
@@ -411,15 +444,45 @@ export function LabSection() {
               {/* Icon */}
               {isMobile ? (
                 <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
-                  <rect x="10" y="2" width="12" height="20" rx="6" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M16 24V38" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  <path d="M10 34l6 4 6-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <rect
+                    x="10"
+                    y="2"
+                    width="12"
+                    height="20"
+                    rx="6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M16 24V38"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M10 34l6 4 6-4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               ) : (
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                   <circle cx="14" cy="14" r="4" fill="currentColor" />
-                  <circle cx="14" cy="14" r="11" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M14 3v4M14 21v4M3 14h4M21 14h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <circle
+                    cx="14"
+                    cy="14"
+                    r="11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M14 3v4M14 21v4M3 14h4M21 14h4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
                 </svg>
               )}
               <span
