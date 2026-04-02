@@ -3,6 +3,7 @@ import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { Services } from "@/components/sections/Services";
 import { Projects } from "@/components/sections/Projects";
+import { LabSection } from "@/components/lab/LabSection";
 import { MarqueeText } from "@/components/ui/MarqueeText";
 import { Contact } from "@/components/sections/Contact";
 
@@ -26,6 +27,11 @@ export default function Home() {
         direction="left"
       />
       <Projects />
+      <MarqueeText
+        text="EXPERIMENTS · WEBGL · MATTER.JS · SIMPLEX NOISE · CANVAS · INTERACTIVE · "
+        direction="right"
+      />
+      <LabSection />
       <Contact />
     </main>
   );
