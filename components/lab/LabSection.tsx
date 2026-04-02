@@ -323,7 +323,7 @@ export function LabSection() {
               className="text-xs tracking-[0.3em] uppercase"
               style={{ color: 'var(--text-muted)' }}
             >
-              — INTERACTIVE LAB
+              INTERACTIVE LAB
             </span>
           </div>
 
