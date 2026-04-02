@@ -1,0 +1,99 @@
+"use client";
+
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+
+interface GeomProps {
+  position: [number, number, number];
+  rotationSpeed: [number, number, number];
+  floatAmp?: number;
+  floatSpeed?: number;
+  color?: string;
+}
+
+function FloatingMesh({
+  position,
+  rotationSpeed,
+  floatAmp = 0.3,
+  floatSpeed = 1,
+  color = "#c8ff00",
+  children,
+}: GeomProps & { children: React.ReactNode }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const tRef = useRef(0);
+  const initY = position[1];
+
+  useFrame((_, delta) => {
+    if (!ref.current) return;
+    tRef.current += delta;
+    ref.current.rotation.x += rotationSpeed[0];
+    ref.current.rotation.y += rotationSpeed[1];
+    ref.current.rotation.z += rotationSpeed[2];
+    ref.current.position.y = initY + Math.sin(tRef.current * floatSpeed) * floatAmp;
+  });
+
+  return (
+    <mesh ref={ref} position={position}>
+      {children}
+      <meshStandardMaterial
+        color={color}
+        wireframe
+        transparent
+        opacity={0.25}
+        emissive={color}
+        emissiveIntensity={0.4}
+      />
+    </mesh>
+  );
+}
+
+export function FloatingGeometry() {
+  return (
+    <group>
+      {/* TorusKnot — top right */}
+      <FloatingMesh
+        position={[2.5, 0.5, -1]}
+        rotationSpeed={[0.003, 0.005, 0.001]}
+        floatSpeed={0.7}
+        floatAmp={0.25}
+        color="#c8ff00"
+      >
+        <torusKnotGeometry args={[0.5, 0.15, 128, 16]} />
+      </FloatingMesh>
+
+      {/* Icosahedron — left */}
+      <FloatingMesh
+        position={[-2.8, -0.3, -0.5]}
+        rotationSpeed={[0.004, 0.002, 0.003]}
+        floatSpeed={0.9}
+        floatAmp={0.35}
+        color="#7b61ff"
+      >
+        <icosahedronGeometry args={[0.7, 1]} />
+      </FloatingMesh>
+
+      {/* Octahedron — bottom */}
+      <FloatingMesh
+        position={[0.8, -2.0, 0.5]}
+        rotationSpeed={[0.002, 0.006, 0.002]}
+        floatSpeed={1.1}
+        floatAmp={0.2}
+        color="#ff6b35"
+      >
+        <octahedronGeometry args={[0.5, 0]} />
+      </FloatingMesh>
+
+      {/* Torus — small, center-top */}
+      <FloatingMesh
+        position={[-0.5, 1.8, -1]}
+        rotationSpeed={[0.005, 0.003, 0.004]}
+        floatSpeed={1.3}
+        floatAmp={0.15}
+        color="#c8ff00"
+      >
+        <torusGeometry args={[0.35, 0.12, 16, 48]} />
+      </FloatingMesh>
+    </group>
+  );
+}
