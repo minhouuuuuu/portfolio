@@ -1,15 +1,17 @@
-"use client";
+'use client'
 
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 
 interface GeomProps {
-  position: [number, number, number];
-  rotationSpeed: [number, number, number];
-  floatAmp?: number;
-  floatSpeed?: number;
-  color?: string;
+  position: [number, number, number]
+  rotationSpeed: [number, number, number]
+  floatAmp?: number
+  floatSpeed?: number
+  color?: string
+  materialOpacity?: number
+  emissiveIntensity?: number
 }
 
 function FloatingMesh({
@@ -17,21 +19,24 @@ function FloatingMesh({
   rotationSpeed,
   floatAmp = 0.3,
   floatSpeed = 1,
-  color = "#c8ff00",
+  color = '#c8ff00',
+  materialOpacity = 0.25,
+  emissiveIntensity = 0.4,
   children,
 }: GeomProps & { children: React.ReactNode }) {
-  const ref = useRef<THREE.Mesh>(null);
-  const tRef = useRef(0);
-  const initY = position[1];
+  const ref = useRef<THREE.Mesh>(null)
+  const tRef = useRef(0)
+  const initY = position[1]
 
   useFrame((_, delta) => {
-    if (!ref.current) return;
-    tRef.current += delta;
-    ref.current.rotation.x += rotationSpeed[0];
-    ref.current.rotation.y += rotationSpeed[1];
-    ref.current.rotation.z += rotationSpeed[2];
-    ref.current.position.y = initY + Math.sin(tRef.current * floatSpeed) * floatAmp;
-  });
+    if (!ref.current) return
+    tRef.current += delta
+    ref.current.rotation.x += rotationSpeed[0]
+    ref.current.rotation.y += rotationSpeed[1]
+    ref.current.rotation.z += rotationSpeed[2]
+    ref.current.position.y =
+      initY + Math.sin(tRef.current * floatSpeed) * floatAmp
+  })
 
   return (
     <mesh ref={ref} position={position}>
@@ -40,20 +45,36 @@ function FloatingMesh({
         color={color}
         wireframe
         transparent
-        opacity={0.25}
+        opacity={materialOpacity}
         emissive={color}
-        emissiveIntensity={0.4}
+        emissiveIntensity={emissiveIntensity}
       />
     </mesh>
-  );
+  )
 }
 
-export function FloatingGeometry() {
+export function FloatingGeometry({ isMobile }: { isMobile: boolean }) {
+  const torusPosition: [number, number, number] = isMobile
+    ? [-0.1, 2, -0.75]
+    : [-0.5, 1.8, -1]
+
+  const torusKnotPosition: [number, number, number] = isMobile
+    ? [1, -3, -0.95]
+    : [2.5, 0.5, -1]
+
+  const torusArgs = isMobile
+    ? ([0.45, 0.16, 18, 56] as [number, number, number, number])
+    : ([0.35, 0.12, 16, 48] as [number, number, number, number])
+
+  const torusFloatAmp = isMobile ? 0.18 : 0.15
+  const torusMaterialOpacity = isMobile ? 0.33 : 0.25
+  const torusEmissiveIntensity = isMobile ? 0.65 : 0.4
+
   return (
     <group>
-      {/* TorusKnot — top right */}
+      {/* TorusKnot — top right (desktop) / bottom (mobile) */}
       <FloatingMesh
-        position={[2.5, 0.5, -1]}
+        position={torusKnotPosition}
         rotationSpeed={[0.003, 0.005, 0.001]}
         floatSpeed={0.7}
         floatAmp={0.25}
@@ -86,14 +107,16 @@ export function FloatingGeometry() {
 
       {/* Torus — small, center-top */}
       <FloatingMesh
-        position={[-0.5, 1.8, -1]}
-        rotationSpeed={[0.005, 0.003, 0.004]}
+        position={torusPosition}
+        rotationSpeed={isMobile ? [0.004, 0.003, 0.004] : [0.005, 0.003, 0.004]}
         floatSpeed={1.3}
-        floatAmp={0.15}
+        floatAmp={torusFloatAmp}
         color="#c8ff00"
+        materialOpacity={torusMaterialOpacity}
+        emissiveIntensity={torusEmissiveIntensity}
       >
-        <torusGeometry args={[0.35, 0.12, 16, 48]} />
+        <torusGeometry args={torusArgs} />
       </FloatingMesh>
     </group>
-  );
+  )
 }
