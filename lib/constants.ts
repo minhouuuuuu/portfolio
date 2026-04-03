@@ -4,7 +4,7 @@ export const PERSONAL_INFO = {
   company: 'IZHAK INTERACT AGENCY',
   location: 'Strasbourg, France',
   email: 'minhstrasbourg@gmail.com',
-  github: 'https://github.com/minhouuuuuuu',
+  github: '',
   linkedin: 'https://www.linkedin.com/in/minh-nguyen-a16293227/',
   instagram: 'https://www.instagram.com/nguyen__minh/',
   portfolio: 'https://nguyen-minh.dev',
@@ -24,7 +24,7 @@ export const PROJECTS = [
     description:
       'Interactive website for a travel agency with immersive 3D animations',
     link: 'https://askar-site.vercel.app/',
-    color: '#c8ff00',
+    color: '#00e5a8',
     image: null,
   },
   {
@@ -41,14 +41,25 @@ export const PROJECTS = [
     id: 3,
     title: 'LA BRASERIE LICORNE',
     year: '2025',
-    tags: ['PHP', 'Tailwind', 'JavaScript', 'Gsap', 'WordPress'],
-    description: 'A historical brewery in France during my internship',
+    tags: ['PHP', 'Tailwind', 'JavaScript', 'Gsap', 'Internship'],
+    description: 'A historical brewery in France.',
     link: 'https://www.brasserielicorne.com/',
     color: '#7b61ff',
     image: null,
   },
   {
     id: 4,
+    title: 'SALPA',
+    year: '2025',
+    tags: ['PHP', 'Tailwind', 'JavaScript', 'Gsap', 'Internship'],
+    description:
+      'Website for a restauration company with a modern and clean design',
+    link: 'https://salpa-restauration.fr/',
+    color: '#c8ff00',
+    image: null,
+  },
+  {
+    id: 5,
     title: 'GRILLI',
     year: '2023',
     tags: ['HTML', 'CSS', 'JavaScript'],
@@ -58,7 +69,7 @@ export const PROJECTS = [
     image: null,
   },
   {
-    id: 5,
+    id: 6,
     title: 'EPIC SAAS',
     year: '2023',
     tags: ['Next.js', 'Supabase', 'Tailwind'],
@@ -68,7 +79,7 @@ export const PROJECTS = [
     image: null,
   },
   {
-    id: 6,
+    id: 7,
     title: 'NEXT DROP',
     year: 'SOON',
     tags: ['WIP', 'Ideas', 'Lab'],
