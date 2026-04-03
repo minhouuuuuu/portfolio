@@ -416,19 +416,23 @@ export function LabSection() {
       </div>
 
       {/* ── Canvas wrapper ──────────────────────────────────────────────────── */}
-      <div
-        ref={canvasWrapRef}
-        className="relative w-full"
-        style={{ height: 'clamp(400px, 70vh, 900px)' }}
-      >
-        <canvas
-          ref={canvasRef}
-          className="w-full h-full block"
+      <div className="max-w-6xl mx-auto px-6">
+        <div
+          ref={canvasWrapRef}
+          className="relative w-full"
           style={{
-            touchAction: 'none',
-            background: '#050505',
+            height: 'clamp(300px, 55vh, 720px)',
+            border: '1px solid var(--border)',
           }}
-        />
+        >
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full block"
+            style={{
+              touchAction: 'none',
+              background: '#050505',
+            }}
+          />
 
         {/* ── Hint overlay ──────────────────────────────────────────────── */}
         {showHint && (
@@ -494,12 +498,14 @@ export function LabSection() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* ── Info strip ──────────────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-6">
       <div
-        className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between"
-        style={{ borderTop: '1px solid var(--border)' }}
+        className="px-4 py-4 flex items-center justify-between"
+        style={{ border: '1px solid var(--border)', borderTop: 'none' }}
       >
         <span
           ref={infoNameRef}
@@ -515,6 +521,7 @@ export function LabSection() {
         >
           {activeExp.stack}
         </span>
+      </div>
       </div>
 
       {/* Bottom spacing */}
