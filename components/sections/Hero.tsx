@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { MagneticButton } from '@/components/ui/MagneticButton'
+import { useLoader } from '@/components/providers/LoaderContext'
 
 const Scene = dynamic(
   () => import('@/components/three/Scene').then((m) => m.Scene),
@@ -18,8 +19,28 @@ export function Hero() {
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const ctaRef = useRef<HTMLDivElement>(null)
 
+  const { loaderDone } = useLoader()
+
+  // Pre-hide all animated elements while loader runs
   useEffect(() => {
     if (!sectionRef.current) return
+    import('gsap').then(({ gsap }) => {
+      gsap.set(
+        [
+          labelRef.current,
+          subtitleRef.current,
+          ctaRef.current,
+          line1Ref.current?.querySelectorAll('.hero-letter'),
+          line2Ref.current?.querySelectorAll('.hero-letter'),
+        ],
+        { autoAlpha: 0 },
+      )
+    })
+  }, [])
+
+  // Entrance animation — fires after loader signals completion
+  useEffect(() => {
+    if (!loaderDone || !sectionRef.current) return
     let ctx: { revert(): void } | undefined
 
     Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
@@ -91,7 +112,7 @@ export function Hero() {
     )
 
     return () => ctx?.revert()
-  }, [])
+  }, [loaderDone])
 
   const handleScroll = (href: string) => {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })

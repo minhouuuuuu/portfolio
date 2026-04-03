@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LenisProvider } from "@/components/providers/LenisProvider";
+import { LoaderProvider } from "@/components/providers/LoaderContext";
 import { CustomCursor } from "@/components/layout/CustomCursor";
 
 const BASE_URL = "https://nguyen-minh.dev";
@@ -101,10 +102,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       </head>
       <body className="noise">
-        <LenisProvider>
-          <CustomCursor />
-          {children}
-        </LenisProvider>
+        <LoaderProvider>
+          <LenisProvider>
+            <CustomCursor />
+            {children}
+          </LenisProvider>
+        </LoaderProvider>
       </body>
     </html>
   );
