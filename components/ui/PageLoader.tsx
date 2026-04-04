@@ -3,332 +3,399 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLoader } from '@/components/providers/LoaderContext'
 
-/* ─── Particle ──────────────────────────────────────────────────────────── */
-interface Particle {
+/* ─── Types ──────────────────────────────────────────────────────────────── */
+interface Star {
   x: number
   y: number
+  px: number          // previous x (for warp streaks)
+  py: number          // previous y
   vx: number
   vy: number
   opacity: number
   targetOpacity: number
   radius: number
-  colorType: 0 | 1 | 2 // 0=distant, 1=medium, 2=accent
+  z: number           // depth 0.05–1.0 (closer = bigger, faster, brighter)
+  angle: number       // radial angle from center
+  colorType: 0 | 1 | 2
 }
 
-function makeParticle(cx: number, cy: number, isMobile: boolean): Particle {
-  const angle = Math.random() * Math.PI * 2
-  const dist = 80 + Math.random() * (isMobile ? 200 : 420)
-  const rand = Math.random()
-  const colorType: 0 | 1 | 2 = rand < 0.8 ? 0 : rand < 0.95 ? 1 : 2
-  return {
-    x: cx + Math.cos(angle) * dist,
-    y: cy + Math.sin(angle) * dist,
-    vx: 0,
-    vy: 0,
-    opacity: 0,
-    targetOpacity:
-      colorType === 0
-        ? 0.12 + Math.random() * 0.1
-        : colorType === 1
-          ? 0.45 + Math.random() * 0.2
-          : 0.75,
-    radius:
-      colorType === 0
-        ? 0.4 + Math.random() * 0.5
-        : colorType === 1
-          ? 0.8 + Math.random() * 0.6
-          : 1.2 + Math.random() * 0.5,
-    colorType,
+type Phase = 'loading' | 'exiting' | 'base' | 'fading'
+
+/* ─── Timing ─────────────────────────────────────────────────────────────── */
+const TOTAL_MS   = 5200
+const T_NGUYEN   = 1900
+const T_MINH     = 3000
+const T_META     = 3900
+const T_COMPLETE = 5000
+
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+function makeStars(cw: number, ch: number, count: number): Star[] {
+  const stars: Star[] = []
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2
+    const z = 0.05 + Math.random() * 0.95
+    // Stars start close to center and spread outward — depth controls spread
+    const maxDist = Math.min(cw, ch) * 0.55
+    const dist = 40 + Math.random() * maxDist * (0.3 + z * 0.7)
+    const x = cw / 2 + Math.cos(angle) * dist
+    const y = ch / 2 + Math.sin(angle) * dist
+
+    const rand = Math.random()
+    const colorType: 0 | 1 | 2 = rand < 0.78 ? 0 : rand < 0.95 ? 1 : 2
+
+    const baseRadius = colorType === 0
+      ? 0.3 + Math.random() * 0.35
+      : colorType === 1
+      ? 0.6 + Math.random() * 0.5
+      : 1.0 + Math.random() * 0.6
+
+    const baseOpacity = colorType === 0
+      ? 0.07 + Math.random() * 0.09
+      : colorType === 1
+      ? 0.3 + Math.random() * 0.25
+      : 0.65 + Math.random() * 0.3
+
+    stars.push({
+      x, y, px: x, py: y,
+      vx: 0, vy: 0,
+      opacity: 0,
+      targetOpacity: baseOpacity * (0.4 + z * 0.6),
+      radius: baseRadius * (0.5 + z * 0.5),
+      z, angle,
+      colorType,
+    })
   }
+  return stars
 }
 
-function particleColor(type: 0 | 1 | 2, opacity: number): string {
-  if (type === 2) return `rgba(200,255,0,${opacity})`
-  return `rgba(255,255,255,${opacity})`
-}
-
-/* ─── Timing ────────────────────────────────────────────────────────────── */
-const TOTAL_MS = 6000
-// phase triggers (ms from start)
-const T_NGUYEN = TOTAL_MS * 0.38 // 2280ms — NGUYEN begins
-const T_MINH = TOTAL_MS * 0.56 // 3360ms — MINH begins
-const T_META = TOTAL_MS * 0.72 // 4320ms — meta text appears
-const T_COMPLETE = TOTAL_MS * 0.97 // 5820ms — progress hits 100%
-
-/* ─── Component ─────────────────────────────────────────────────────────── */
+/* ─── Component ──────────────────────────────────────────────────────────── */
 export function PageLoader({ onComplete }: { onComplete: () => void }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef      = useRef<HTMLCanvasElement>(null)
   const progressBarRef = useRef<HTMLDivElement>(null)
-  const flashDotRef = useRef<HTMLDivElement>(null)
-  const whiteRef = useRef<HTMLDivElement>(null)
-  const rafRef = useRef<number>(0)
-  const startRef = useRef<number>(0)
-  const particlesRef = useRef<Particle[]>([])
-  const isExitingRef = useRef(false)
-  const exitStartRef = useRef<number>(0)
+  const whiteRef       = useRef<HTMLDivElement>(null)
+  const wrapperRef     = useRef<HTMLDivElement>(null)
+  const rafRef         = useRef<number>(0)
+  const startRef       = useRef<number>(0)
+  const starsRef       = useRef<Star[]>([])
+  const phaseRef       = useRef<Phase>('loading')
+  const exitStartRef   = useRef<number>(0)
+  const lastBarUpdate  = useRef<number>(0)
 
-  const [showNguyen, setShowNguyen] = useState(false)
-  const [showMinh, setShowMinh] = useState(false)
-  const [showMeta, setShowMeta] = useState(false)
+  const [showNguyen,    setShowNguyen]    = useState(false)
+  const [showMinh,      setShowMinh]      = useState(false)
+  const [showMeta,      setShowMeta]      = useState(false)
   const [progressFlash, setProgressFlash] = useState(false)
-  const [reducedVisible, setReducedVisible] = useState(true)
+  const [isBase,        setIsBase]        = useState(false)
+  const [reducedDone,   setReducedDone]   = useState(false)
+  // Detect reduced-motion in state to avoid SSR/client mismatch
+  const [prefersReduced, setPrefersReduced] = useState(false)
+
+  useEffect(() => {
+    setPrefersReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }, [])
 
   const { setLoaderDone } = useLoader()
 
+  /* ─── Reduced motion ──────────────────────────────────────────────────── */
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!reduced) return
+    const t = setTimeout(() => {
+      setReducedDone(true)
+      setTimeout(() => { setLoaderDone(true); onComplete() }, 600)
+    }, 1200)
+    return () => clearTimeout(t)
+  }, [onComplete, setLoaderDone])
 
-    /* ── Reduced motion: simple 1s fade ─────────────────────────────── */
-    if (reduced) {
-      const t = setTimeout(() => {
-        setReducedVisible(false)
-        setTimeout(() => {
-          setLoaderDone(true)
-          onComplete()
-        }, 600)
-      }, 1200)
-      return () => clearTimeout(t)
-    }
+  /* ─── Main cinematic loop ─────────────────────────────────────────────── */
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
 
-    /* ── Prevent background scroll ─────────────────────────────────── */
     document.body.style.overflow = 'hidden'
 
     const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
-    const isMobile = window.innerWidth < 768
+    const gl     = canvas.getContext('2d')!
 
-    /* ── Canvas size ─────────────────────────────────────────────── */
+    const isMobile = window.innerWidth < 768
+    // Mobile: DPR locked to 1 to halve fill area cost
+    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio ?? 1, 1.5)
+
     const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      const W = window.innerWidth
+      const H = window.innerHeight
+      canvas.width  = W * dpr
+      canvas.height = H * dpr
+      canvas.style.width  = `${W}px`
+      canvas.style.height = `${H}px`
+      // setTransform instead of scale — prevents accumulation on multiple resize calls
+      gl.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     resize()
     window.addEventListener('resize', resize)
 
-    /* ── Particles ───────────────────────────────────────────────── */
-    const count = isMobile ? 400 : 800
-    const cx0 = canvas.width / 2
-    const cy0 = canvas.height / 2
-    particlesRef.current = Array.from({ length: count }, () =>
-      makeParticle(cx0, cy0, isMobile),
+    const count = isMobile ? 180 : 650
+    starsRef.current = makeStars(
+      canvas.width / dpr,
+      canvas.height / dpr,
+      count,
     )
 
-    /* ── Audio ───────────────────────────────────────────────────── */
+    /* ── Audio ───────────────────────────────────────────────────────── */
     let gainNode: GainNode | null = null
-    let audioCtx: AudioContext | null = null
     try {
-      audioCtx = new AudioContext()
-      const osc = audioCtx.createOscillator()
-      gainNode = audioCtx.createGain()
+      const actx = new AudioContext()
+      const osc  = actx.createOscillator()
+      gainNode   = actx.createGain()
       osc.frequency.value = 220
       gainNode.gain.value = 0
       osc.connect(gainNode)
-      gainNode.connect(audioCtx.destination)
+      gainNode.connect(actx.destination)
       osc.start()
-      gainNode.gain.linearRampToValueAtTime(0.02, audioCtx.currentTime + 2.5)
-    } catch (_) {
-      /* silent fail */
-    }
+      gainNode.gain.linearRampToValueAtTime(0.018, actx.currentTime + 3)
+      // Clean up on exit
+      const killAudio = () => {
+        gainNode?.gain.linearRampToValueAtTime(0, actx.currentTime + 0.15)
+      }
+      window._loaderKillAudio = killAudio
+    } catch (_) { /* silent fail */ }
 
-    /* ── Phase triggers ──────────────────────────────────────────── */
+    /* ── Phase timeouts ──────────────────────────────────────────────── */
     const t1 = setTimeout(() => setShowNguyen(true), T_NGUYEN)
-    const t2 = setTimeout(() => setShowMinh(true), T_MINH)
-    const t3 = setTimeout(() => setShowMeta(true), T_META)
+    const t2 = setTimeout(() => setShowMinh(true),   T_MINH)
+    const t3 = setTimeout(() => setShowMeta(true),   T_META)
     const t4 = setTimeout(() => {
-      // progress bar snaps to 100% + accent flash
       if (progressBarRef.current) {
         progressBarRef.current.style.width = '100%'
         progressBarRef.current.style.backgroundColor = '#c8ff00'
       }
       setProgressFlash(true)
       setTimeout(() => {
-        if (progressBarRef.current) {
+        if (progressBarRef.current)
           progressBarRef.current.style.backgroundColor = 'rgba(255,255,255,0.3)'
-        }
         setProgressFlash(false)
         startExit()
       }, 200)
     }, T_COMPLETE)
 
-    /* ── Exit sequence ────────────────────────────────────────────── */
+    /* ── Exit sequence ────────────────────────────────────────────────── */
     function startExit() {
-      isExitingRef.current = true
+      phaseRef.current   = 'exiting'
       exitStartRef.current = performance.now()
+      window._loaderKillAudio?.()
 
-      // Step 2 (400ms): center flash — bright white burst
-      setTimeout(() => {
-        const dot = flashDotRef.current
-        if (dot) {
-          dot.style.transition = 'none'
-          dot.style.opacity = '1'
-          dot.style.transform = 'translate(-50%, -50%) scale(4)'
-        }
-      }, 400)
-      setTimeout(() => {
-        const dot = flashDotRef.current
-        if (dot) {
-          dot.style.transition = 'opacity 100ms ease, transform 100ms ease'
-          dot.style.opacity = '0'
-          dot.style.transform = 'translate(-50%, -50%) scale(1)'
-        }
-      }, 500)
-
-      // Step 3 (500ms): white circle expands from center
+      // +700ms: center ignition flash via canvas (handled in RAF)
+      // +700ms: white circle explodes
       setTimeout(() => {
         const w = whiteRef.current
-        if (w) {
-          w.style.opacity = '1'
-          // Force reflow before starting transition
-          void w.offsetWidth
-          w.style.transition = 'clip-path 500ms ease-in'
-          w.style.clipPath = 'circle(160vmax at 50% 50%)'
-        }
-      }, 500)
+        if (!w) return
+        w.style.opacity = '1'
+        void w.offsetWidth
+        w.style.transition = 'clip-path 600ms cubic-bezier(0.16,1,0.3,1)'
+        w.style.clipPath = 'circle(160vmax at 50% 50%)'
+      }, 700)
 
-      // Step 4 (1000ms): white fades out, signal hero
+      // +1400ms: white fades back to black — reveal base state
       setTimeout(() => {
-        setLoaderDone(true) // hero entrance begins
         const w = whiteRef.current
-        if (w) {
-          w.style.transition = 'opacity 600ms ease-in-out'
-          w.style.opacity = '0'
-        }
-      }, 1000)
+        if (!w) return
+        w.style.transition = 'opacity 450ms ease-out'
+        w.style.opacity = '0'
+        // Reset clip so it doesn't block pointer events
+        setTimeout(() => {
+          if (whiteRef.current) whiteRef.current.style.clipPath = 'circle(0px at 50% 50%)'
+        }, 500)
+        phaseRef.current = 'base'
+        setIsBase(true)  // hides text/particles overlay, shows just dot
+      }, 1400)
 
-      // Step 6 (1700ms): silence audio, unmount
+      // +2400ms: hero is ready
       setTimeout(() => {
-        if (gainNode && audioCtx) {
-          gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1)
+        setLoaderDone(true)
+      }, 2400)
+
+      // +2700ms: loader fades out
+      setTimeout(() => {
+        phaseRef.current = 'fading'
+        if (wrapperRef.current) {
+          wrapperRef.current.style.transition = 'opacity 400ms ease-out'
+          wrapperRef.current.style.opacity = '0'
         }
+      }, 2700)
+
+      // +3100ms: unmount
+      setTimeout(() => {
         document.body.style.overflow = ''
         onComplete()
-      }, 1700)
+      }, 3100)
     }
 
-    /* ── RAF loop ─────────────────────────────────────────────────── */
+    /* ── RAF ──────────────────────────────────────────────────────────── */
     startRef.current = performance.now()
-    let lastProgressUpdate = 0
+
+    // Mobile: track frame skip for perf
+    let frameCount = 0
 
     function tick(timestamp: number) {
       const elapsed = Math.max(0, timestamp - startRef.current)
-      const w = canvas.width
-      const h = canvas.height
-      const cx = w / 2
-      const cy = h / 2
+      const W = canvas.width  / dpr
+      const H = canvas.height / dpr
+      const cx = W / 2
+      const cy = H / 2
 
-      ctx.clearRect(0, 0, w, h)
+      // Mobile: skip every other frame for physics only (still draw every frame)
+      const doPhysics = !isMobile || (frameCount % 2 === 0)
+      frameCount++
 
-      /* ── Gravitational ripples ─── */
-      for (let r = 0; r < 2; r++) {
-        const rippleT = (elapsed + r * 4000) % 8000
-        const rippleRadius = Math.max(0, (rippleT / 8000) * 280)
-        const rippleAlpha = 0.04 * (1 - rippleT / 8000)
-        if (Number.isFinite(rippleRadius) && rippleRadius > 0) {
-          ctx.beginPath()
-          ctx.arc(cx, cy, rippleRadius, 0, Math.PI * 2)
-          ctx.strokeStyle = `rgba(255,255,255,${rippleAlpha})`
-          ctx.lineWidth = 1
-          ctx.stroke()
+      gl.clearRect(0, 0, W, H)
+
+      const phase = phaseRef.current
+
+      /* ── Gravitational ripples (loading phase only) ─── */
+      if (phase === 'loading') {
+        for (let r = 0; r < 2; r++) {
+          const rT = (elapsed + r * 4000) % 8000
+          const rR = Math.max(0, (rT / 8000) * 260)
+          const rA = 0.035 * (1 - rT / 8000)
+          if (rR > 0) {
+            gl.beginPath()
+            gl.arc(cx, cy, rR, 0, Math.PI * 2)
+            gl.strokeStyle = `rgba(255,255,255,${rA})`
+            gl.lineWidth = 0.8
+            gl.stroke()
+          }
         }
       }
 
-      /* ── Particles ─── */
-      const fadeInProgress = Math.min(elapsed / 2200, 1)
-      const isCollapsing =
-        isExitingRef.current &&
-        timestamp - exitStartRef.current < 700
+      /* ── Stars ─── */
+      const fadeIn = Math.min(elapsed / 2400, 1)
+      const isExiting = phase === 'exiting'
+      const isBaseState = phase === 'base' || phase === 'fading'
+      const exitT = isExiting
+        ? Math.min((timestamp - exitStartRef.current) / 800, 1)
+        : 0
 
-      for (const p of particlesRef.current) {
-        if (!isExitingRef.current) {
-          // Fade in during phase 1
-          const target = p.targetOpacity * fadeInProgress
-          p.opacity += (target - p.opacity) * 0.04
+      // Batch by colorType to reduce fillStyle calls
+      // Groups: type0[], type1[], type2[]
+      if (!isBaseState) {
+        const batches: [string, { x: number; y: number; px: number; py: number; r: number; op: number }[]][] = [
+          ['rgba(255,255,255,{op})', []],
+          ['rgba(255,255,255,{op})', []],
+          ['rgba(200,255,0,{op})',   []],
+        ]
 
-          // Slow spiral drift toward center (accretion disk)
-          const dx = cx - p.x
-          const dy = cy - p.y
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1
-          // Radial (inward)
-          p.vx += (dx / dist) * 0.0003
-          p.vy += (dy / dist) * 0.0003
-          // Tangential (perpendicular — clockwise spiral)
-          p.vx += (-dy / dist) * 0.00035
-          p.vy += (dx / dist) * 0.00035
-          // Speed cap
-          const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy)
-          const MAX_SPD = 0.08
-          if (spd > MAX_SPD) {
-            p.vx = (p.vx / spd) * MAX_SPD
-            p.vy = (p.vy / spd) * MAX_SPD
+        for (const s of starsRef.current) {
+          if (doPhysics) {
+            if (!isExiting) {
+              // Normal drift: slow outward parallax by depth
+              // Close (z≈1) stars drift faster → depth illusion
+              const driftSpeed = 0.004 + s.z * 0.018
+              const nx = Math.cos(s.angle) * driftSpeed
+              const ny = Math.sin(s.angle) * driftSpeed
+              s.vx = s.vx * 0.96 + nx * 0.04
+              s.vy = s.vy * 0.96 + ny * 0.04
+
+              const target = s.targetOpacity * fadeIn
+              s.opacity += (target - s.opacity) * 0.035
+            } else {
+              // WARP: accelerate radially outward — cubic ease-in
+              const warpEase = exitT * exitT * exitT
+              const outSpeed = warpEase * (isMobile ? 6 : 12) * s.z
+              s.px = s.x
+              s.py = s.y
+              s.vx += Math.cos(s.angle) * outSpeed
+              s.vy += Math.sin(s.angle) * outSpeed
+              s.opacity = s.targetOpacity * (1 - warpEase * 0.9)
+            }
+
+            s.x += s.vx
+            s.y += s.vy
           }
-        } else if (isCollapsing) {
-          // Accelerate toward center (gravitational collapse)
-          const t = Math.min((timestamp - exitStartRef.current) / 700, 1)
-          const ease = t * t * t // ease-in cubic
-          const dx = cx - p.x
-          const dy = cy - p.y
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1
-          const force = ease * 20
-          p.vx += (dx / dist) * force
-          p.vy += (dy / dist) * force
-          p.vx *= 0.75
-          p.vy *= 0.75
-          p.opacity = p.targetOpacity * (1 - ease)
+
+          if (s.opacity < 0.01) continue
+
+          batches[s.colorType][1].push({
+            x: s.x, y: s.y, px: s.px, py: s.py,
+            r: Math.max(0.1, s.radius),
+            op: s.opacity,
+          })
         }
 
-        p.x += p.vx
-        p.y += p.vy
+        // Draw each batch
+        // Type 0 & 1: white (varying opacity — draw individually but skip fillStyle per-particle via alpha)
+        // Type 2: accent
 
-        if (p.opacity > 0.01) {
-          const particleRadius = Math.max(0, p.radius)
-          if (!(Number.isFinite(particleRadius) && particleRadius > 0)) continue
-          ctx.beginPath()
-          ctx.arc(p.x, p.y, particleRadius, 0, Math.PI * 2)
-          ctx.fillStyle = particleColor(p.colorType, p.opacity)
-          ctx.fill()
+        // On desktop, draw warp streaks
+        if (isExiting && !isMobile) {
+          for (let t = 0; t < 3; t++) {
+            const colorFmt = t === 2 ? 'rgba(200,255,0,{op})' : 'rgba(255,255,255,{op})'
+            for (const s of batches[t][1]) {
+              const dx = s.x - s.px
+              const dy = s.y - s.py
+              const len = Math.sqrt(dx * dx + dy * dy)
+              if (len > 0.5) {
+                gl.beginPath()
+                gl.moveTo(s.px, s.py)
+                gl.lineTo(s.x, s.y)
+                gl.strokeStyle = colorFmt.replace('{op}', String(s.op * 0.7))
+                gl.lineWidth = s.r * 1.2
+                gl.stroke()
+              }
+            }
+          }
+        }
+
+        // Draw star dots
+        // Group by approximate opacity bucket to reduce fillStyle changes
+        for (let t = 0; t < 3; t++) {
+          const colorFmt = t === 2 ? 'rgba(200,255,0,{op})' : 'rgba(255,255,255,{op})'
+          // Sort by opacity so we can batch nearby values (optional optimization)
+          for (const s of batches[t][1]) {
+            gl.beginPath()
+            gl.arc(s.x, s.y, s.r, 0, Math.PI * 2)
+            gl.fillStyle = colorFmt.replace('{op}', s.op.toFixed(2))
+            gl.fill()
+          }
         }
       }
 
       /* ── Center dot ─── */
-      // Pulse: scale 1→1.4→1, 4s loop
       const pulsePhase = (elapsed / 4000) * Math.PI * 2
       const pulseScale = 1 + 0.4 * Math.max(0, Math.sin(pulsePhase))
-      const dotR = 2 * pulseScale
+      let dotR = 2.2 * pulseScale
 
-      // Final big pulse at exit start
-      let bigPulseExtra = 0
-      if (isExitingRef.current) {
-        const exitT = Math.min((timestamp - exitStartRef.current) / 500, 1)
-        bigPulseExtra = exitT * 3 * (1 - exitT) // rises and falls
-      }
-      const finalR = Math.max(0, dotR + bigPulseExtra * 4)
-
-      // Glow halo
-      const glowRadius = finalR * 8
-      if (Number.isFinite(glowRadius) && glowRadius > 0) {
-        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius)
-        glow.addColorStop(0, 'rgba(255,255,255,0.5)')
-        glow.addColorStop(1, 'rgba(255,255,255,0)')
-        ctx.beginPath()
-        ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2)
-        ctx.fillStyle = glow
-        ctx.fill()
+      if (isExiting) {
+        // Final implosion then re-expansion before white flash
+        const flashT = Math.min((timestamp - exitStartRef.current - 500) / 200, 1)
+        if (flashT > 0) dotR += flashT * (1 - flashT) * 4 * 6 // brief mega-pulse
       }
 
-      // Core
-      if (Number.isFinite(finalR) && finalR > 0) {
-        ctx.beginPath()
-        ctx.arc(cx, cy, finalR, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(255,255,255,0.95)'
-        ctx.fill()
+      dotR = Math.max(0.5, dotR)
+
+      // Glow
+      const glowR = dotR * 9
+      if (glowR > 0) {
+        const grd = gl.createRadialGradient(cx, cy, 0, cx, cy, glowR)
+        grd.addColorStop(0, 'rgba(255,255,255,0.45)')
+        grd.addColorStop(1, 'rgba(255,255,255,0)')
+        gl.beginPath()
+        gl.arc(cx, cy, glowR, 0, Math.PI * 2)
+        gl.fillStyle = grd
+        gl.fill()
       }
 
-      /* ── Progress bar (direct DOM — no React re-render) ─── */
-      if (progressBarRef.current && !isExitingRef.current) {
-        if (timestamp - lastProgressUpdate > 50) {
+      // Core dot
+      gl.beginPath()
+      gl.arc(cx, cy, dotR, 0, Math.PI * 2)
+      gl.fillStyle = 'rgba(255,255,255,0.95)'
+      gl.fill()
+
+      /* ── Progress bar ─── */
+      if (phase === 'loading' && progressBarRef.current) {
+        if (timestamp - lastBarUpdate.current > 80) {
           const prog = Math.min(elapsed / TOTAL_MS, 0.97)
           progressBarRef.current.style.width = `${prog * 100}%`
-          lastProgressUpdate = timestamp
+          lastBarUpdate.current = timestamp
         }
       }
 
@@ -339,296 +406,177 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
 
     return () => {
       cancelAnimationFrame(rafRef.current)
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
-      clearTimeout(t4)
+      clearTimeout(t1); clearTimeout(t2)
+      clearTimeout(t3); clearTimeout(t4)
       window.removeEventListener('resize', resize)
       document.body.style.overflow = ''
+      delete window._loaderKillAudio
     }
   }, [onComplete, setLoaderDone])
 
-  /* ── Reduced motion fallback ──────────────────────────────────────────── */
-  const prefersReduced =
-    typeof window !== 'undefined'
-      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      : false
-
+  /* ─── Reduced motion shortcut ─────────────────────────────────────────── */
   if (prefersReduced) {
     return (
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9997,
-          backgroundColor: '#000000',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'opacity 600ms ease',
-          opacity: reducedVisible ? 1 : 0,
-          pointerEvents: reducedVisible ? 'all' : 'none',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "'PP Monument Extended', sans-serif",
-            fontWeight: 900,
-            fontSize: 'clamp(2rem, 8vw, 6rem)',
-            color: 'rgba(255,255,255,0.9)',
-            letterSpacing: '0.3em',
-          }}
-        >
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 9997,
+        backgroundColor: '#000', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        transition: 'opacity 600ms ease',
+        opacity: reducedDone ? 0 : 1,
+        pointerEvents: reducedDone ? 'none' : 'all',
+      }}>
+        <span style={{
+          fontFamily: "'PP Monument Extended', sans-serif",
+          fontWeight: 900, fontSize: 'clamp(2rem,8vw,5rem)',
+          color: 'rgba(255,255,255,0.9)', letterSpacing: '0.3em',
+        }}>
           NGUYEN MINH
         </span>
       </div>
     )
   }
 
-  /* ── Full cinematic loader ─────────────────────────────────────────────── */
+  /* ─── Full render ─────────────────────────────────────────────────────── */
   return (
     <div
+      ref={wrapperRef}
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9997,
-        backgroundColor: '#000000',
-        overflow: 'hidden',
+        position: 'fixed', inset: 0, zIndex: 9997,
+        backgroundColor: '#000000', overflow: 'hidden',
       }}
     >
-      {/* TIME watermark — subliminal texture (opacity 0.03) */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          overflow: 'hidden',
-          opacity: 0.03,
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
+      {/* TIME watermark — subliminal, opacity 0.025 */}
+      <div aria-hidden style={{
+        position: 'absolute', inset: 0, overflow: 'hidden',
+        opacity: 0.025, pointerEvents: 'none', userSelect: 'none',
+      }}>
         {([
-          [-12, -15],
-          [13, 10],
-          [38, -20],
-          [63, 15],
-          [-5, 50],
-          [25, 60],
-          [55, 45],
-          [80, 55],
-        ] as [number, number][]).map(([left, top], i) => (
-          <span
-            key={i}
-            style={{
-              position: 'absolute',
-              left: `${left}vw`,
-              top: `${top}vh`,
-              fontFamily: "'PP Monument Extended', sans-serif",
-              fontWeight: 300,
-              fontSize: '22vw',
-              color: 'white',
-              whiteSpace: 'nowrap',
-              lineHeight: 1,
-              transform: 'rotate(90deg)',
-              transformOrigin: 'left top',
-            }}
-          >
-            TIME
-          </span>
+          [-8, -10], [18, 12], [42, -18], [65, 18],
+          [0, 52], [28, 64], [58, 48], [82, 58],
+        ] as [number, number][]).map(([l, t], i) => (
+          <span key={i} style={{
+            position: 'absolute', left: `${l}vw`, top: `${t}vh`,
+            fontFamily: "'PP Monument Extended', sans-serif",
+            fontWeight: 300, fontSize: '21vw', color: 'white',
+            whiteSpace: 'nowrap', lineHeight: 1,
+            transform: 'rotate(90deg)', transformOrigin: 'left top',
+          }}>TIME</span>
         ))}
       </div>
 
-      {/* Canvas: particles + ripples + center dot */}
-      <canvas
-        ref={canvasRef}
-        style={{ position: 'absolute', inset: 0, display: 'block' }}
-      />
+      {/* Canvas — particles + center dot */}
+      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, display: 'block' }} />
 
       {/* Vignette */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          background:
-            'radial-gradient(ellipse 75% 75% at 50% 50%, transparent 25%, rgba(0,0,0,0.65) 100%)',
-        }}
-      />
+      <div aria-hidden style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 70% 70% at 50% 50%, transparent 20%, rgba(0,0,0,0.7) 100%)',
+      }} />
 
-      {/* ── NGUYEN + MINH text ── */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
+      {/* NGUYEN + MINH — hidden in base state */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        pointerEvents: 'none', userSelect: 'none',
+        opacity: isBase ? 0 : 1,
+        transition: isBase ? 'opacity 300ms ease-out' : 'none',
+      }}>
         {/* NGUYEN */}
-        <div
-          style={{
-            fontFamily: "'PP Monument Extended', sans-serif",
-            fontWeight: 900,
-            fontSize: 'clamp(2.4rem, 6.2vw, 6.2rem)',
-            color: 'rgba(255,255,255,0.9)',
-            letterSpacing: '0.3em',
-            lineHeight: 1,
-            display: 'flex',
-          }}
-        >
-          {['N', 'G', 'U', 'Y', 'E', 'N'].map((l, i) => (
-            <span
-              key={i}
-              style={{
-                display: 'inline-block',
-                opacity: showNguyen ? 1 : 0,
-                filter: showNguyen ? 'blur(0px)' : 'blur(20px)',
-                transition: 'opacity 600ms ease, filter 600ms ease',
-                transitionDelay: showNguyen ? `${i * 150}ms` : '0ms',
-                willChange: 'opacity, filter',
-              }}
-            >
-              {l}
-            </span>
+        <div style={{
+          fontFamily: "'PP Monument Extended', sans-serif",
+          fontWeight: 900,
+          fontSize: 'clamp(2.5rem, 6.5vw, 6.5rem)',
+          color: 'rgba(255,255,255,0.9)',
+          letterSpacing: '0.3em', lineHeight: 1, display: 'flex',
+        }}>
+          {['N','G','U','Y','E','N'].map((l, i) => (
+            <span key={i} style={{
+              display: 'inline-block',
+              opacity: showNguyen ? 1 : 0,
+              filter: showNguyen ? 'blur(0px)' : 'blur(22px)',
+              transition: 'opacity 700ms ease, filter 700ms ease',
+              transitionDelay: showNguyen ? `${i * 120}ms` : '0ms',
+              willChange: 'opacity, filter',
+            }}>{l}</span>
           ))}
         </div>
 
         {/* MINH */}
-        <div
-          style={{
-            fontFamily: "'PP Monument Extended', sans-serif",
-            fontWeight: 900,
-            fontSize: 'clamp(2rem, 5.3vw, 5.3rem)',
-            color: 'rgba(255,255,255,0.9)',
-            letterSpacing: '0.3em',
-            lineHeight: 1,
-            marginTop: '0.15em',
-            display: 'flex',
-          }}
-        >
-          {['M', 'I', 'N', 'H'].map((l, i) => (
-            <span
-              key={i}
-              style={{
-                display: 'inline-block',
-                opacity: showMinh ? 1 : 0,
-                filter: showMinh ? 'blur(0px)' : 'blur(20px)',
-                transition: 'opacity 600ms ease, filter 600ms ease',
-                transitionDelay: showMinh ? `${i * 200}ms` : '0ms',
-                willChange: 'opacity, filter',
-              }}
-            >
-              {l}
-            </span>
+        <div style={{
+          fontFamily: "'PP Monument Extended', sans-serif",
+          fontWeight: 900,
+          fontSize: 'clamp(2rem, 5.5vw, 5.5rem)',
+          color: 'rgba(255,255,255,0.9)',
+          letterSpacing: '0.3em', lineHeight: 1,
+          marginTop: '0.12em', display: 'flex',
+        }}>
+          {['M','I','N','H'].map((l, i) => (
+            <span key={i} style={{
+              display: 'inline-block',
+              opacity: showMinh ? 1 : 0,
+              filter: showMinh ? 'blur(0px)' : 'blur(22px)',
+              transition: 'opacity 700ms ease, filter 700ms ease',
+              transitionDelay: showMinh ? `${i * 180}ms` : '0ms',
+              willChange: 'opacity, filter',
+            }}>{l}</span>
           ))}
         </div>
       </div>
 
-      {/* ── Meta text ── */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '10vh',
-          left: 0,
-          right: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '0.6rem',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
-        {(
-          [
-            ['CREATIVE WEB DEVELOPER', 0],
-            ['STRASBOURG — PARIS — HANOI', 500],
-            ['2026', 1000],
-          ] as [string, number][]
-        ).map(([text, delay]) => (
-          <span
-            key={text}
-            style={{
-              fontFamily: "'PP Neue Machina', monospace",
-              fontWeight: 300,
-              fontSize: 'clamp(0.55rem, 1.2vw, 0.75rem)',
-              letterSpacing: '0.25em',
-              color: 'white',
-              opacity: showMeta ? 0.4 : 0,
-              transition: 'opacity 1000ms ease',
-              transitionDelay: showMeta ? `${delay}ms` : '0ms',
-            }}
-          >
-            {text}
-          </span>
+      {/* Meta text — hidden in base state */}
+      <div style={{
+        position: 'absolute', bottom: '10vh', left: 0, right: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: '0.55rem',
+        pointerEvents: 'none', userSelect: 'none',
+        opacity: isBase ? 0 : 1,
+        transition: isBase ? 'opacity 300ms ease-out' : 'none',
+      }}>
+        {([
+          ['CREATIVE WEB DEVELOPER', 0],
+          ['STRASBOURG — PARIS — HANOI', 500],
+          ['2026', 1000],
+        ] as [string, number][]).map(([text, delay]) => (
+          <span key={text} style={{
+            fontFamily: "'PP Neue Machina', monospace",
+            fontWeight: 300,
+            fontSize: 'clamp(0.5rem, 1.1vw, 0.7rem)',
+            letterSpacing: '0.28em', color: 'white',
+            opacity: showMeta ? 0.38 : 0,
+            transition: 'opacity 1000ms ease',
+            transitionDelay: showMeta ? `${delay}ms` : '0ms',
+          }}>{text}</span>
         ))}
       </div>
 
-      {/* ── Progress bar (1px film reel) ── */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          ref={progressBarRef}
-          style={{
-            height: '100%',
-            width: '0%',
-            backgroundColor: progressFlash
-              ? '#c8ff00'
-              : 'rgba(255,255,255,0.3)',
-            transition: progressFlash
-              ? 'background-color 200ms ease'
-              : 'none',
-          }}
-        />
+      {/* Progress bar — film reel, hidden in base state */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        height: '1px', backgroundColor: 'rgba(255,255,255,0.05)',
+        opacity: isBase ? 0 : 1,
+        transition: isBase ? 'opacity 300ms ease-out' : 'none',
+      }}>
+        <div ref={progressBarRef} style={{
+          height: '100%', width: '0%',
+          backgroundColor: progressFlash ? '#c8ff00' : 'rgba(255,255,255,0.28)',
+          transition: progressFlash ? 'background-color 200ms ease' : 'none',
+        }} />
       </div>
 
-      {/* ── Center flash point (for star-ignition) ── */}
-      <div
-        ref={flashDotRef}
-        aria-hidden
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%) scale(1)',
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          backgroundColor: 'white',
-          boxShadow: '0 0 20px 8px rgba(255,255,255,0.8)',
-          opacity: 0,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* ── White expansion overlay (stellar collapse flash) ── */}
-      <div
-        ref={whiteRef}
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: 'white',
-          clipPath: 'circle(0px at 50% 50%)',
-          opacity: 1,
-          pointerEvents: 'none',
-        }}
-      />
+      {/* White stellar explosion overlay */}
+      <div ref={whiteRef} aria-hidden style={{
+        position: 'absolute', inset: 0,
+        backgroundColor: 'white',
+        clipPath: 'circle(0px at 50% 50%)',
+        opacity: 1,
+        pointerEvents: 'none',
+      }} />
     </div>
   )
+}
+
+// Ambient global type for audio cleanup
+declare global {
+  interface Window { _loaderKillAudio?: () => void }
 }
