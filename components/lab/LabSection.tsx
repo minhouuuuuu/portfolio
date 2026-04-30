@@ -1,6 +1,8 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { MagneticButton } from '@/components/ui/MagneticButton'
 import { useLabCanvas } from './useLabCanvas'
 
 type GsapInstance = typeof import('gsap').gsap
@@ -522,6 +524,23 @@ export function LabSection() {
           {activeExp.stack}
         </span>
       </div>
+      </div>
+
+      {/* ── Wanna see more? ─────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-6 flex justify-center pt-10 pb-4">
+        <MagneticButton>
+          <Link
+            href="/donut"
+            className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-(--accent) text-(--bg) bg-(--accent) inline-block"
+            style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
+          >
+            <span className="relative z-10">WANNA SEE MORE? →</span>
+            <span
+              className="absolute inset-0 bg-transparent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 border border-(--accent)"
+              style={{ transformOrigin: 'left' }}
+            />
+          </Link>
+        </MagneticButton>
       </div>
 
       {/* Bottom spacing */}
