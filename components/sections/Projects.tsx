@@ -20,57 +20,37 @@ export function Projects() {
           // Title reveal
           gsap.fromTo(
             titleRef.current?.children ?? [],
-            { y: 60, opacity: 0 },
+            { y: 40, opacity: 0 },
             {
               y: 0,
               opacity: 1,
-              stagger: 0.1,
-              duration: 0.9,
+              stagger: 0.08,
+              duration: 0.8,
               ease: 'expo.out',
               scrollTrigger: {
-                trigger: titleRef.current,
+                trigger: sectionRef.current,
                 start: 'top 80%',
                 toggleActions: 'play none none reverse',
               },
             },
           )
 
-          // Horizontal scroll
+          // Horizontal scroll — pin the section for exactly the scroll distance
+          // needed to traverse the track. Both x and end recalculate on refresh.
           const track = trackRef.current!
-          const cards = track.querySelectorAll('.project-card')
-          const totalWidth = track.scrollWidth - window.innerWidth
 
           gsap.to(track, {
-            x: () => -totalWidth,
+            x: () => -(track.scrollWidth - window.innerWidth),
             ease: 'none',
             scrollTrigger: {
               trigger: sectionRef.current,
               start: 'top top',
-              end: () => `+=${totalWidth + window.innerWidth * 0.5}`,
+              end: () => `+=${track.scrollWidth - window.innerWidth}`,
               scrub: 1,
               pin: true,
               anticipatePin: 1,
               invalidateOnRefresh: true,
             },
-          })
-
-          // Individual card entrance (rotateY)
-          cards.forEach((card) => {
-            gsap.fromTo(
-              card,
-              { rotateY: 60, opacity: 0 },
-              {
-                rotateY: 0,
-                opacity: 1,
-                duration: 0.9,
-                ease: 'expo.out',
-                scrollTrigger: {
-                  trigger: card,
-                  start: 'left 90%',
-                  toggleActions: 'play none none reverse',
-                },
-              },
-            )
           })
         }, sectionRef)
       },
@@ -83,41 +63,42 @@ export function Projects() {
     <section
       id="projects"
       ref={sectionRef}
-      className="relative overflow-hidden"
-      style={{ background: 'var(--bg-2)' }}
+      className="relative"
+      style={{ background: 'var(--bg-2)', height: '100vh', overflow: 'hidden' }}
     >
-      {/* Title (not pinned, scrolls normally) */}
-      <div className="max-w-6xl mx-auto px-6 pt-24 pb-12">
-        <div ref={titleRef}>
-          <div
-            className="flex items-center gap-3 mb-6"
-            style={{ fontFamily: 'var(--font-mono)' }}
+      {/* Title — absolute so it doesn't add to the section's scroll height */}
+      <div
+        ref={titleRef}
+        className="absolute top-0 left-0 right-0 max-w-6xl mx-auto px-6 pt-16 z-10 pointer-events-none"
+      >
+        <div
+          className="flex items-center gap-3 mb-4"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          <span
+            className="inline-block w-6 h-px"
+            style={{ backgroundColor: 'var(--text-muted)' }}
+          />
+          <span
+            className="text-xs tracking-[0.3em] uppercase"
+            style={{ color: 'var(--text-muted)' }}
           >
-            <span
-              className="inline-block w-6 h-px"
-              style={{ backgroundColor: 'var(--text-muted)' }}
-            />
-            <span
-              className="text-xs tracking-[0.3em] uppercase"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              SELECTED WORK
-            </span>
-          </div>
-          <h2
-            className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            PROJECTS
-          </h2>
+            SELECTED WORK
+          </span>
         </div>
+        <h2
+          className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          PROJECTS
+        </h2>
       </div>
 
-      {/* Horizontal scroll track */}
-      <div className="overflow-hidden">
+      {/* Horizontal scroll track — vertically centered in the viewport */}
+      <div className="absolute inset-0 flex items-center overflow-hidden">
         <div
           ref={trackRef}
-          className="horizontal-scroll-container gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-[max(1.5rem,env(safe-area-inset-right))] pb-32 md:pb-16 pt-4"
+          className="flex gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-12"
           style={{ width: 'max-content' }}
         >
           {PROJECTS.map((project, i) => (
@@ -142,7 +123,7 @@ function ProjectCard({
     : (project.link ?? PERSONAL_INFO.portfolio)
 
   const cardInner = (
-    <TiltCard className={projectLink ? 'w-full h-full' : 'project-card shrink-0 w-[min(85vw,420px)] h-[520px]'}>
+    <TiltCard className="w-full h-full">
       <div
         className="relative w-full h-full overflow-hidden border border-(--border) group"
         style={{ background: 'var(--surface)' }}
@@ -251,5 +232,9 @@ function ProjectCard({
     )
   }
 
-  return cardInner
+  return (
+    <div className="project-card shrink-0 w-[min(85vw,420px)] h-[520px]">
+      {cardInner}
+    </div>
+  )
 }

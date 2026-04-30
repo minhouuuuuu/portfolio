@@ -29,8 +29,12 @@ export function Hero() {
         labelRef.current,
         subtitleRef.current,
         ctaRef.current,
-        ...(line1Ref.current ? Array.from(line1Ref.current.querySelectorAll('.hero-letter')) : []),
-        ...(line2Ref.current ? Array.from(line2Ref.current.querySelectorAll('.hero-letter')) : []),
+        ...(line1Ref.current
+          ? Array.from(line1Ref.current.querySelectorAll('.hero-letter'))
+          : []),
+        ...(line2Ref.current
+          ? Array.from(line2Ref.current.querySelectorAll('.hero-letter'))
+          : []),
       ].filter(Boolean)
       if (targets.length) gsap.set(targets, { autoAlpha: 0 })
     })

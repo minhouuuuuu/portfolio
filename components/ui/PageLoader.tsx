@@ -7,25 +7,25 @@ import { useLoader } from '@/components/providers/LoaderContext'
 interface Star {
   x: number
   y: number
-  px: number          // previous x (for warp streaks)
-  py: number          // previous y
+  px: number // previous x (for warp streaks)
+  py: number // previous y
   vx: number
   vy: number
   opacity: number
   targetOpacity: number
   radius: number
-  z: number           // depth 0.05–1.0 (closer = bigger, faster, brighter)
-  angle: number       // radial angle from center
+  z: number // depth 0.05–1.0 (closer = bigger, faster, brighter)
+  angle: number // radial angle from center
   colorType: 0 | 1 | 2
 }
 
 type Phase = 'loading' | 'exiting' | 'base' | 'fading'
 
 /* ─── Timing ─────────────────────────────────────────────────────────────── */
-const TOTAL_MS   = 5200
-const T_NGUYEN   = 1900
-const T_MINH     = 3000
-const T_META     = 3900
+const TOTAL_MS = 5200
+const T_NGUYEN = 1900
+const T_MINH = 3000
+const T_META = 3900
 const T_COMPLETE = 5000
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
@@ -43,25 +43,32 @@ function makeStars(cw: number, ch: number, count: number): Star[] {
     const rand = Math.random()
     const colorType: 0 | 1 | 2 = rand < 0.78 ? 0 : rand < 0.95 ? 1 : 2
 
-    const baseRadius = colorType === 0
-      ? 0.3 + Math.random() * 0.35
-      : colorType === 1
-      ? 0.6 + Math.random() * 0.5
-      : 1.0 + Math.random() * 0.6
+    const baseRadius =
+      colorType === 0
+        ? 0.3 + Math.random() * 0.35
+        : colorType === 1
+          ? 0.6 + Math.random() * 0.5
+          : 1.0 + Math.random() * 0.6
 
-    const baseOpacity = colorType === 0
-      ? 0.07 + Math.random() * 0.09
-      : colorType === 1
-      ? 0.3 + Math.random() * 0.25
-      : 0.65 + Math.random() * 0.3
+    const baseOpacity =
+      colorType === 0
+        ? 0.07 + Math.random() * 0.09
+        : colorType === 1
+          ? 0.3 + Math.random() * 0.25
+          : 0.65 + Math.random() * 0.3
 
     stars.push({
-      x, y, px: x, py: y,
-      vx: 0, vy: 0,
+      x,
+      y,
+      px: x,
+      py: y,
+      vx: 0,
+      vy: 0,
       opacity: 0,
       targetOpacity: baseOpacity * (0.4 + z * 0.6),
       radius: baseRadius * (0.5 + z * 0.5),
-      z, angle,
+      z,
+      angle,
       colorType,
     })
   }
@@ -70,52 +77,61 @@ function makeStars(cw: number, ch: number, count: number): Star[] {
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
 export function PageLoader({ onComplete }: { onComplete: () => void }) {
-  const canvasRef      = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const progressBarRef = useRef<HTMLDivElement>(null)
-  const whiteRef       = useRef<HTMLDivElement>(null)
-  const wrapperRef     = useRef<HTMLDivElement>(null)
-  const rafRef         = useRef<number>(0)
-  const startRef       = useRef<number>(0)
-  const starsRef       = useRef<Star[]>([])
-  const phaseRef       = useRef<Phase>('loading')
-  const exitStartRef   = useRef<number>(0)
-  const lastBarUpdate  = useRef<number>(0)
+  const whiteRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number>(0)
+  const startRef = useRef<number>(0)
+  const starsRef = useRef<Star[]>([])
+  const phaseRef = useRef<Phase>('loading')
+  const exitStartRef = useRef<number>(0)
+  const lastBarUpdate = useRef<number>(0)
 
-  const [showNguyen,    setShowNguyen]    = useState(false)
-  const [showMinh,      setShowMinh]      = useState(false)
-  const [showMeta,      setShowMeta]      = useState(false)
+  const [showNguyen, setShowNguyen] = useState(false)
+  const [showMinh, setShowMinh] = useState(false)
+  const [showMeta, setShowMeta] = useState(false)
   const [progressFlash, setProgressFlash] = useState(false)
-  const [isBase,        setIsBase]        = useState(false)
-  const [reducedDone,   setReducedDone]   = useState(false)
+  const [isBase, setIsBase] = useState(false)
+  const [reducedDone, setReducedDone] = useState(false)
   // Detect reduced-motion in state to avoid SSR/client mismatch
   const [prefersReduced, setPrefersReduced] = useState(false)
 
   useEffect(() => {
-    setPrefersReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    setPrefersReduced(
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    )
   }, [])
 
   const { setLoaderDone } = useLoader()
 
   /* ─── Reduced motion ──────────────────────────────────────────────────── */
   useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
     if (!reduced) return
     const t = setTimeout(() => {
       setReducedDone(true)
-      setTimeout(() => { setLoaderDone(true); onComplete() }, 600)
+      setTimeout(() => {
+        setLoaderDone(true)
+        onComplete()
+      }, 600)
     }, 1200)
     return () => clearTimeout(t)
   }, [onComplete, setLoaderDone])
 
   /* ─── Main cinematic loop ─────────────────────────────────────────────── */
   useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
     if (reduced) return
 
     document.body.style.overflow = 'hidden'
 
     const canvas = canvasRef.current!
-    const gl     = canvas.getContext('2d')!
+    const gl = canvas.getContext('2d')!
 
     const isMobile = window.innerWidth < 768
     // Mobile: DPR locked to 1 to halve fill area cost
@@ -124,9 +140,9 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
     const resize = () => {
       const W = window.innerWidth
       const H = window.innerHeight
-      canvas.width  = W * dpr
+      canvas.width = W * dpr
       canvas.height = H * dpr
-      canvas.style.width  = `${W}px`
+      canvas.style.width = `${W}px`
       canvas.style.height = `${H}px`
       // setTransform instead of scale — prevents accumulation on multiple resize calls
       gl.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -135,16 +151,12 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
     window.addEventListener('resize', resize)
 
     const count = isMobile ? 180 : 650
-    starsRef.current = makeStars(
-      canvas.width / dpr,
-      canvas.height / dpr,
-      count,
-    )
+    starsRef.current = makeStars(canvas.width / dpr, canvas.height / dpr, count)
 
     /* ── Phase timeouts ──────────────────────────────────────────────── */
     const t1 = setTimeout(() => setShowNguyen(true), T_NGUYEN)
-    const t2 = setTimeout(() => setShowMinh(true),   T_MINH)
-    const t3 = setTimeout(() => setShowMeta(true),   T_META)
+    const t2 = setTimeout(() => setShowMinh(true), T_MINH)
+    const t3 = setTimeout(() => setShowMeta(true), T_META)
     const t4 = setTimeout(() => {
       if (progressBarRef.current) {
         progressBarRef.current.style.width = '100%'
@@ -161,7 +173,7 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
 
     /* ── Exit sequence ────────────────────────────────────────────────── */
     function startExit() {
-      phaseRef.current   = 'exiting'
+      phaseRef.current = 'exiting'
       exitStartRef.current = performance.now()
 
       // +700ms: center ignition flash via canvas (handled in RAF)
@@ -183,10 +195,11 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
         w.style.opacity = '0'
         // Reset clip so it doesn't block pointer events
         setTimeout(() => {
-          if (whiteRef.current) whiteRef.current.style.clipPath = 'circle(0px at 50% 50%)'
+          if (whiteRef.current)
+            whiteRef.current.style.clipPath = 'circle(0px at 50% 50%)'
         }, 500)
         phaseRef.current = 'base'
-        setIsBase(true)  // hides text/particles overlay, shows just dot
+        setIsBase(true) // hides text/particles overlay, shows just dot
       }, 1400)
 
       // +2400ms: hero is ready
@@ -218,13 +231,13 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
 
     function tick(timestamp: number) {
       const elapsed = Math.max(0, timestamp - startRef.current)
-      const W = canvas.width  / dpr
+      const W = canvas.width / dpr
       const H = canvas.height / dpr
       const cx = W / 2
       const cy = H / 2
 
       // Mobile: skip every other frame for physics only (still draw every frame)
-      const doPhysics = !isMobile || (frameCount % 2 === 0)
+      const doPhysics = !isMobile || frameCount % 2 === 0
       frameCount++
 
       gl.clearRect(0, 0, W, H)
@@ -258,10 +271,20 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
       // Batch by colorType to reduce fillStyle calls
       // Groups: type0[], type1[], type2[]
       if (!isBaseState) {
-        const batches: [string, { x: number; y: number; px: number; py: number; r: number; op: number }[]][] = [
+        const batches: [
+          string,
+          {
+            x: number
+            y: number
+            px: number
+            py: number
+            r: number
+            op: number
+          }[],
+        ][] = [
           ['rgba(255,255,255,{op})', []],
           ['rgba(255,255,255,{op})', []],
-          ['rgba(200,255,0,{op})',   []],
+          ['rgba(200,255,0,{op})', []],
         ]
 
         for (const s of starsRef.current) {
@@ -295,7 +318,10 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
           if (s.opacity < 0.01) continue
 
           batches[s.colorType][1].push({
-            x: s.x, y: s.y, px: s.px, py: s.py,
+            x: s.x,
+            y: s.y,
+            px: s.px,
+            py: s.py,
             r: Math.max(0.1, s.radius),
             op: s.opacity,
           })
@@ -308,7 +334,8 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
         // On desktop, draw warp streaks
         if (isExiting && !isMobile) {
           for (let t = 0; t < 3; t++) {
-            const colorFmt = t === 2 ? 'rgba(200,255,0,{op})' : 'rgba(255,255,255,{op})'
+            const colorFmt =
+              t === 2 ? 'rgba(200,255,0,{op})' : 'rgba(255,255,255,{op})'
             for (const s of batches[t][1]) {
               const dx = s.x - s.px
               const dy = s.y - s.py
@@ -328,7 +355,8 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
         // Draw star dots
         // Group by approximate opacity bucket to reduce fillStyle changes
         for (let t = 0; t < 3; t++) {
-          const colorFmt = t === 2 ? 'rgba(200,255,0,{op})' : 'rgba(255,255,255,{op})'
+          const colorFmt =
+            t === 2 ? 'rgba(200,255,0,{op})' : 'rgba(255,255,255,{op})'
           // Sort by opacity so we can batch nearby values (optional optimization)
           for (const s of batches[t][1]) {
             gl.beginPath()
@@ -346,7 +374,10 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
 
       if (isExiting) {
         // Final implosion then re-expansion before white flash
-        const flashT = Math.min((timestamp - exitStartRef.current - 500) / 200, 1)
+        const flashT = Math.min(
+          (timestamp - exitStartRef.current - 500) / 200,
+          1,
+        )
         if (flashT > 0) dotR += flashT * (1 - flashT) * 4 * 6 // brief mega-pulse
       }
 
@@ -386,8 +417,10 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
 
     return () => {
       cancelAnimationFrame(rafRef.current)
-      clearTimeout(t1); clearTimeout(t2)
-      clearTimeout(t3); clearTimeout(t4)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+      clearTimeout(t4)
       window.removeEventListener('resize', resize)
       document.body.style.overflow = ''
     }
@@ -396,19 +429,29 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
   /* ─── Reduced motion shortcut ─────────────────────────────────────────── */
   if (prefersReduced) {
     return (
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 9997,
-        backgroundColor: '#000', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        transition: 'opacity 600ms ease',
-        opacity: reducedDone ? 0 : 1,
-        pointerEvents: reducedDone ? 'none' : 'all',
-      }}>
-        <span style={{
-          fontFamily: "'PP Monument Extended', sans-serif",
-          fontWeight: 900, fontSize: 'clamp(2rem,8vw,5rem)',
-          color: 'rgba(255,255,255,0.9)', letterSpacing: '0.3em',
-        }}>
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9997,
+          backgroundColor: '#000',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'opacity 600ms ease',
+          opacity: reducedDone ? 0 : 1,
+          pointerEvents: reducedDone ? 'none' : 'all',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'PP Monument Extended', sans-serif",
+            fontWeight: 900,
+            fontSize: 'clamp(2rem,8vw,5rem)',
+            color: 'rgba(255,255,255,0.9)',
+            letterSpacing: '0.3em',
+          }}
+        >
           NGUYEN MINH
         </span>
       </div>
@@ -420,138 +463,232 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
     <div
       ref={wrapperRef}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9997,
-        backgroundColor: '#000000', overflow: 'hidden',
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9997,
+        backgroundColor: '#000000',
+        overflow: 'hidden',
       }}
     >
       {/* TIME watermark — subliminal, opacity 0.025 */}
-      <div aria-hidden style={{
-        position: 'absolute', inset: 0, overflow: 'hidden',
-        opacity: 0.025, pointerEvents: 'none', userSelect: 'none',
-      }}>
-        {([
-          [-8, -10], [18, 12], [42, -18], [65, 18],
-          [0, 52], [28, 64], [58, 48], [82, 58],
-        ] as [number, number][]).map(([l, t], i) => (
-          <span key={i} style={{
-            position: 'absolute', left: `${l}vw`, top: `${t}vh`,
-            fontFamily: "'PP Monument Extended', sans-serif",
-            fontWeight: 300, fontSize: '21vw', color: 'white',
-            whiteSpace: 'nowrap', lineHeight: 1,
-            transform: 'rotate(90deg)', transformOrigin: 'left top',
-          }}>TIME</span>
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          overflow: 'hidden',
+          opacity: 0.025,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        {(
+          [
+            [-8, -10],
+            [18, 12],
+            [42, -18],
+            [65, 18],
+            [0, 52],
+            [28, 64],
+            [58, 48],
+            [82, 58],
+          ] as [number, number][]
+        ).map(([l, t], i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${l}vw`,
+              top: `${t}vh`,
+              fontFamily: "'PP Monument Extended', sans-serif",
+              fontWeight: 300,
+              fontSize: '21vw',
+              color: 'white',
+              whiteSpace: 'nowrap',
+              lineHeight: 1,
+              transform: 'rotate(90deg)',
+              transformOrigin: 'left top',
+            }}
+          >
+            TIME
+          </span>
         ))}
       </div>
 
       {/* Canvas — particles + center dot */}
-      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, display: 'block' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'absolute', inset: 0, display: 'block' }}
+      />
 
       {/* Vignette */}
-      <div aria-hidden style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 70% 70% at 50% 50%, transparent 20%, rgba(0,0,0,0.7) 100%)',
-      }} />
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background:
+            'radial-gradient(ellipse 70% 70% at 50% 50%, transparent 20%, rgba(0,0,0,0.7) 100%)',
+        }}
+      />
 
       {/* NGUYEN + MINH — hidden in base state */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        pointerEvents: 'none', userSelect: 'none',
-        opacity: isBase ? 0 : 1,
-        transition: isBase ? 'opacity 300ms ease-out' : 'none',
-      }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          opacity: isBase ? 0 : 1,
+          transition: isBase ? 'opacity 300ms ease-out' : 'none',
+        }}
+      >
         {/* NGUYEN */}
-        <div style={{
-          fontFamily: "'PP Monument Extended', sans-serif",
-          fontWeight: 900,
-          fontSize: 'clamp(2.5rem, 6.5vw, 6.5rem)',
-          color: 'rgba(255,255,255,0.9)',
-          letterSpacing: '0.3em', lineHeight: 1, display: 'flex',
-        }}>
-          {['N','G','U','Y','E','N'].map((l, i) => (
-            <span key={i} style={{
-              display: 'inline-block',
-              opacity: showNguyen ? 1 : 0,
-              filter: showNguyen ? 'blur(0px)' : 'blur(22px)',
-              transition: 'opacity 700ms ease, filter 700ms ease',
-              transitionDelay: showNguyen ? `${i * 120}ms` : '0ms',
-              willChange: 'opacity, filter',
-            }}>{l}</span>
+        <div
+          style={{
+            fontFamily: "'PP Monument Extended', sans-serif",
+            fontWeight: 900,
+            fontSize: 'clamp(2.5rem, 6.5vw, 6.5rem)',
+            color: 'rgba(255,255,255,0.9)',
+            letterSpacing: '0.3em',
+            lineHeight: 1,
+            display: 'flex',
+          }}
+        >
+          {['N', 'G', 'U', 'Y', 'E', 'N'].map((l, i) => (
+            <span
+              key={i}
+              style={{
+                display: 'inline-block',
+                opacity: showNguyen ? 1 : 0,
+                filter: showNguyen ? 'blur(0px)' : 'blur(22px)',
+                transition: 'opacity 700ms ease, filter 700ms ease',
+                transitionDelay: showNguyen ? `${i * 120}ms` : '0ms',
+                willChange: 'opacity, filter',
+              }}
+            >
+              {l}
+            </span>
           ))}
         </div>
 
         {/* MINH */}
-        <div style={{
-          fontFamily: "'PP Monument Extended', sans-serif",
-          fontWeight: 900,
-          fontSize: 'clamp(2rem, 5.5vw, 5.5rem)',
-          color: 'rgba(255,255,255,0.9)',
-          letterSpacing: '0.3em', lineHeight: 1,
-          marginTop: '0.12em', display: 'flex',
-        }}>
-          {['M','I','N','H'].map((l, i) => (
-            <span key={i} style={{
-              display: 'inline-block',
-              opacity: showMinh ? 1 : 0,
-              filter: showMinh ? 'blur(0px)' : 'blur(22px)',
-              transition: 'opacity 700ms ease, filter 700ms ease',
-              transitionDelay: showMinh ? `${i * 180}ms` : '0ms',
-              willChange: 'opacity, filter',
-            }}>{l}</span>
+        <div
+          style={{
+            fontFamily: "'PP Monument Extended', sans-serif",
+            fontWeight: 900,
+            fontSize: 'clamp(2rem, 5.5vw, 5.5rem)',
+            color: 'rgba(255,255,255,0.9)',
+            letterSpacing: '0.3em',
+            lineHeight: 1,
+            marginTop: '0.12em',
+            display: 'flex',
+          }}
+        >
+          {['M', 'I', 'N', 'H'].map((l, i) => (
+            <span
+              key={i}
+              style={{
+                display: 'inline-block',
+                opacity: showMinh ? 1 : 0,
+                filter: showMinh ? 'blur(0px)' : 'blur(22px)',
+                transition: 'opacity 700ms ease, filter 700ms ease',
+                transitionDelay: showMinh ? `${i * 180}ms` : '0ms',
+                willChange: 'opacity, filter',
+              }}
+            >
+              {l}
+            </span>
           ))}
         </div>
       </div>
 
       {/* Meta text — hidden in base state */}
-      <div style={{
-        position: 'absolute', bottom: '10vh', left: 0, right: 0,
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', gap: '0.55rem',
-        pointerEvents: 'none', userSelect: 'none',
-        opacity: isBase ? 0 : 1,
-        transition: isBase ? 'opacity 300ms ease-out' : 'none',
-      }}>
-        {([
-          ['CREATIVE WEB DEVELOPER', 0],
-          ['STRASBOURG — PARIS — HANOI', 500],
-          ['2026', 1000],
-        ] as [string, number][]).map(([text, delay]) => (
-          <span key={text} style={{
-            fontFamily: "'PP Neue Machina', monospace",
-            fontWeight: 300,
-            fontSize: 'clamp(0.5rem, 1.1vw, 0.7rem)',
-            letterSpacing: '0.28em', color: 'white',
-            opacity: showMeta ? 0.38 : 0,
-            transition: 'opacity 1000ms ease',
-            transitionDelay: showMeta ? `${delay}ms` : '0ms',
-          }}>{text}</span>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '10vh',
+          left: 0,
+          right: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.55rem',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          opacity: isBase ? 0 : 1,
+          transition: isBase ? 'opacity 300ms ease-out' : 'none',
+        }}
+      >
+        {(
+          [
+            ['CREATIVE WEB DEVELOPER', 0],
+            ['FRANCE — VIETNAM', 500],
+            ['2026', 1000],
+          ] as [string, number][]
+        ).map(([text, delay]) => (
+          <span
+            key={text}
+            style={{
+              fontFamily: "'PP Neue Machina', monospace",
+              fontWeight: 300,
+              fontSize: 'clamp(0.5rem, 1.1vw, 0.7rem)',
+              letterSpacing: '0.28em',
+              color: 'white',
+              opacity: showMeta ? 0.38 : 0,
+              transition: 'opacity 1000ms ease',
+              transitionDelay: showMeta ? `${delay}ms` : '0ms',
+            }}
+          >
+            {text}
+          </span>
         ))}
       </div>
 
       {/* Progress bar — film reel, hidden in base state */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: '1px', backgroundColor: 'rgba(255,255,255,0.05)',
-        opacity: isBase ? 0 : 1,
-        transition: isBase ? 'opacity 300ms ease-out' : 'none',
-      }}>
-        <div ref={progressBarRef} style={{
-          height: '100%', width: '0%',
-          backgroundColor: progressFlash ? '#c8ff00' : 'rgba(255,255,255,0.28)',
-          transition: progressFlash ? 'background-color 200ms ease' : 'none',
-        }} />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          opacity: isBase ? 0 : 1,
+          transition: isBase ? 'opacity 300ms ease-out' : 'none',
+        }}
+      >
+        <div
+          ref={progressBarRef}
+          style={{
+            height: '100%',
+            width: '0%',
+            backgroundColor: progressFlash
+              ? '#c8ff00'
+              : 'rgba(255,255,255,0.28)',
+            transition: progressFlash ? 'background-color 200ms ease' : 'none',
+          }}
+        />
       </div>
 
       {/* White stellar explosion overlay */}
-      <div ref={whiteRef} aria-hidden style={{
-        position: 'absolute', inset: 0,
-        backgroundColor: 'white',
-        clipPath: 'circle(0px at 50% 50%)',
-        opacity: 1,
-        pointerEvents: 'none',
-      }} />
+      <div
+        ref={whiteRef}
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'white',
+          clipPath: 'circle(0px at 50% 50%)',
+          opacity: 1,
+          pointerEvents: 'none',
+        }}
+      />
     </div>
   )
 }
-

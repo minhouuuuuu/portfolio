@@ -1,14 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
+import { useActiveSection } from "@/hooks/useActiveSection";
 import { NAV_LINKS } from "@/lib/constants";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const progress = useScrollProgress();
+  
+  const sectionIds = useMemo(() => 
+    ["#hero", ...NAV_LINKS.map((link) => link.href)],
+    []
+  );
+  const activeSection = useActiveSection(sectionIds);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -24,10 +31,14 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100]">
-      {/* Scroll progress bar */}
+      {/* Scroll progress bar - neon green with glow */}
       <div
-        className="absolute top-0 left-0 h-[2px] bg-[var(--accent)] origin-left transition-transform duration-100"
-        style={{ transform: `scaleX(${progress})`, width: "100%" }}
+        className="fixed top-0 left-0 h-[3px] z-[110] pointer-events-none"
+        style={{
+          width: `${progress * 100}%`,
+          background: "var(--accent)",
+          boxShadow: "0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px rgba(200, 255, 0, 0.5)",
+        }}
       />
 
       <motion.nav
@@ -56,18 +67,40 @@ export function Navbar() {
 
         {/* Nav links */}
         <ul className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                onClick={(e) => handleAnchor(e, link.href)}
-                className="hover-underline font-mono text-xs tracking-[0.2em] uppercase text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-300"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive = activeSection === link.href;
+            return (
+              <li key={link.href} className="relative">
+                <a
+                  href={link.href}
+                  onClick={(e) => handleAnchor(e, link.href)}
+                  className={`font-mono text-xs tracking-[0.2em] uppercase transition-colors duration-300 ${
+                    isActive
+                      ? "text-[var(--accent)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                  }`}
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {link.label}
+                </a>
+                {/* Active indicator */}
+                <motion.span
+                  className="absolute -bottom-1 left-0 h-[2px] bg-[var(--accent)]"
+                  initial={false}
+                  animate={{
+                    width: isActive ? "100%" : "0%",
+                    opacity: isActive ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  style={{
+                    boxShadow: isActive
+                      ? "0 0 8px var(--accent), 0 0 12px rgba(200, 255, 0, 0.5)"
+                      : "none",
+                  }}
+                />
+              </li>
+            );
+          })}
         </ul>
 
         {/* CTA */}

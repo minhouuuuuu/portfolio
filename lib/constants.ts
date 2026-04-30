@@ -4,7 +4,7 @@ export const PERSONAL_INFO = {
   company: 'IZHAK INTERACT AGENCY',
   location: 'Strasbourg, France',
   email: 'minhstrasbourg@gmail.com',
-  github: '',
+  github: 'https://github.com/minhouuuuuu',
   linkedin: 'https://www.linkedin.com/in/minh-nguyen-a16293227/',
   instagram: 'https://www.instagram.com/nguyen__minh/',
   portfolio: 'https://nguyen-minh.dev',
