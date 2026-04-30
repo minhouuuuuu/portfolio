@@ -27,7 +27,7 @@ export default function DonutPage() {
       >
         {/* ── Back ──────────────────────────────────────────────────────── */}
         <Link
-          href="/#lab"
+          href="/"
           style={{
             position: 'absolute',
             top: 24,
@@ -44,7 +44,7 @@ export default function DonutPage() {
             pointerEvents: 'auto',
           }}
         >
-          ← Lab
+          ← Home
         </Link>
 
         {/* ── Label ───────────────────────────────────────────────────── */}

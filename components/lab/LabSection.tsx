@@ -436,107 +436,129 @@ export function LabSection() {
             }}
           />
 
-        {/* ── Hint overlay ──────────────────────────────────────────────── */}
-        {showHint && (
-          <div
-            ref={hintRef}
-            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-            style={{ opacity: 0.7 }}
-          >
+          {/* ── Hint overlay ──────────────────────────────────────────────── */}
+          {showHint && (
             <div
-              className="flex flex-col items-center gap-4"
-              style={{ color: 'var(--text-muted)' }}
+              ref={hintRef}
+              className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+              style={{ opacity: 0.7 }}
             >
-              {/* Icon */}
-              {isMobile ? (
-                <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
-                  <rect
-                    x="10"
-                    y="2"
-                    width="12"
-                    height="20"
-                    rx="6"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M16 24V38"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M10 34l6 4 6-4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : (
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                  <circle cx="14" cy="14" r="4" fill="currentColor" />
-                  <circle
-                    cx="14"
-                    cy="14"
-                    r="11"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M14 3v4M14 21v4M3 14h4M21 14h4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              )}
-              <span
-                className="font-mono text-xs tracking-[0.25em] uppercase"
-                style={{ fontFamily: 'var(--font-mono)' }}
+              <div
+                className="flex flex-col items-center gap-4"
+                style={{ color: 'var(--text-muted)' }}
               >
-                {isMobile ? activeExp.hint.mobile : activeExp.hint.desktop}
-              </span>
+                {/* Icon */}
+                {isMobile ? (
+                  <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
+                    <rect
+                      x="10"
+                      y="2"
+                      width="12"
+                      height="20"
+                      rx="6"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M16 24V38"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M10 34l6 4 6-4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <circle cx="14" cy="14" r="4" fill="currentColor" />
+                    <circle
+                      cx="14"
+                      cy="14"
+                      r="11"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M14 3v4M14 21v4M3 14h4M21 14h4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+                <span
+                  className="font-mono text-xs tracking-[0.25em] uppercase"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  {isMobile ? activeExp.hint.mobile : activeExp.hint.desktop}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
 
       {/* ── Info strip ──────────────────────────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-6">
-      <div
-        className="px-4 py-4 flex items-center justify-between"
-        style={{ border: '1px solid var(--border)', borderTop: 'none' }}
-      >
-        <span
-          ref={infoNameRef}
-          className="font-display text-sm font-black uppercase tracking-wider"
-          style={{ fontFamily: 'var(--font-display)' }}
+        <div
+          className="px-4 py-4 flex items-center justify-between"
+          style={{ border: '1px solid var(--border)', borderTop: 'none' }}
         >
-          {activeExp.name}
-        </span>
-        <span
-          ref={infoStackRef}
-          className="font-mono text-xs tracking-[0.15em]"
-          style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
-        >
-          {activeExp.stack}
-        </span>
-      </div>
+          <span
+            ref={infoNameRef}
+            className="font-display text-sm font-black uppercase tracking-wider"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {activeExp.name}
+          </span>
+          <span
+            ref={infoStackRef}
+            className="font-mono text-xs tracking-[0.15em]"
+            style={{
+              color: 'var(--text-muted)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {activeExp.stack}
+          </span>
+        </div>
       </div>
 
-      {/* ── Wanna see more? ─────────────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto px-6 flex justify-center pt-10 pb-4">
+      {/* ── Wanna see more? / Performance Test ─────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-center gap-4 pt-10 pb-4">
         <MagneticButton>
           <Link
             href="/donut"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-(--accent) text-(--bg) bg-(--accent) inline-block"
             style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
           >
             <span className="relative z-10">WANNA SEE MORE? →</span>
             <span
               className="absolute inset-0 bg-transparent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 border border-(--accent)"
+              style={{ transformOrigin: 'left' }}
+            />
+          </Link>
+        </MagneticButton>
+        <MagneticButton>
+          <Link
+            href="/performancetest"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-(--accent) text-(--accent) bg-transparent inline-block"
+            style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
+          >
+            <span className="relative z-10 group-hover:text-(--bg) transition-colors duration-300">
+              PERFORMANCE TEST ⚡
+            </span>
+            <span
+              className="absolute inset-0 bg-(--accent) origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
               style={{ transformOrigin: 'left' }}
             />
           </Link>
