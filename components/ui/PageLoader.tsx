@@ -141,25 +141,6 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
       count,
     )
 
-    /* ── Audio ───────────────────────────────────────────────────────── */
-    let gainNode: GainNode | null = null
-    try {
-      const actx = new AudioContext()
-      const osc  = actx.createOscillator()
-      gainNode   = actx.createGain()
-      osc.frequency.value = 220
-      gainNode.gain.value = 0
-      osc.connect(gainNode)
-      gainNode.connect(actx.destination)
-      osc.start()
-      gainNode.gain.linearRampToValueAtTime(0.018, actx.currentTime + 3)
-      // Clean up on exit
-      const killAudio = () => {
-        gainNode?.gain.linearRampToValueAtTime(0, actx.currentTime + 0.15)
-      }
-      window._loaderKillAudio = killAudio
-    } catch (_) { /* silent fail */ }
-
     /* ── Phase timeouts ──────────────────────────────────────────────── */
     const t1 = setTimeout(() => setShowNguyen(true), T_NGUYEN)
     const t2 = setTimeout(() => setShowMinh(true),   T_MINH)
@@ -182,7 +163,6 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
     function startExit() {
       phaseRef.current   = 'exiting'
       exitStartRef.current = performance.now()
-      window._loaderKillAudio?.()
 
       // +700ms: center ignition flash via canvas (handled in RAF)
       // +700ms: white circle explodes
@@ -410,7 +390,6 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
       clearTimeout(t3); clearTimeout(t4)
       window.removeEventListener('resize', resize)
       document.body.style.overflow = ''
-      delete window._loaderKillAudio
     }
   }, [onComplete, setLoaderDone])
 
@@ -576,7 +555,3 @@ export function PageLoader({ onComplete }: { onComplete: () => void }) {
   )
 }
 
-// Ambient global type for audio cleanup
-declare global {
-  interface Window { _loaderKillAudio?: () => void }
-}
