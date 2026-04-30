@@ -52,7 +52,7 @@
   --color-surface: #111111;
   --color-surface-2: #1a1a1a;
   --color-text: #f0ede8;
-  --color-text-muted: rgba(240, 237, 232, 0.4);
+  --color-text-muted: rgba(240, 237, 232, 0.57);
   --color-accent: #c8ff00;
   --color-accent-2: #ff6b35;
   --color-accent-3: #7b61ff;
@@ -72,7 +72,7 @@
   --surface-2: #1a1a1a;
   --border: rgba(255, 255, 255, 0.06);
   --text: #f0ede8;
-  --text-muted: rgba(240, 237, 232, 0.4);
+  --text-muted: rgba(240, 237, 232, 0.57);
   --accent: #c8ff00;
   --accent-2: #ff6b35;
   --accent-3: #7b61ff;

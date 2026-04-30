@@ -25,16 +25,14 @@ export function Hero() {
   useEffect(() => {
     if (!sectionRef.current) return
     import('gsap').then(({ gsap }) => {
-      gsap.set(
-        [
-          labelRef.current,
-          subtitleRef.current,
-          ctaRef.current,
-          line1Ref.current?.querySelectorAll('.hero-letter'),
-          line2Ref.current?.querySelectorAll('.hero-letter'),
-        ],
-        { autoAlpha: 0 },
-      )
+      const targets = [
+        labelRef.current,
+        subtitleRef.current,
+        ctaRef.current,
+        ...(line1Ref.current ? Array.from(line1Ref.current.querySelectorAll('.hero-letter')) : []),
+        ...(line2Ref.current ? Array.from(line2Ref.current.querySelectorAll('.hero-letter')) : []),
+      ].filter(Boolean)
+      if (targets.length) gsap.set(targets, { autoAlpha: 0 })
     })
   }, [])
 
@@ -166,6 +164,7 @@ export function Hero() {
           style={{ perspective: '800px' }}
         >
           <h1
+            aria-label="NGUYEN"
             className="font-display text-[12vw] sm:text-[9.5vw] md:text-[8vw] font-black leading-none tracking-[-0.02em] uppercase"
             style={{
               fontFamily: 'var(--font-display)',
@@ -192,6 +191,7 @@ export function Hero() {
           style={{ perspective: '800px' }}
         >
           <h1
+            aria-label="MINH"
             className="font-display text-[12vw] sm:text-[9.5vw] md:text-[8vw] font-black leading-none tracking-[-0.02em] uppercase"
             style={{
               fontFamily: 'var(--font-display)',
@@ -235,7 +235,7 @@ export function Hero() {
           <MagneticButton>
             <button
               onClick={() => handleScroll('#projects')}
-              className="group relative px-8 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-[var(--accent)] text-[var(--bg)] bg-[var(--accent)]"
+              className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-[var(--accent)] text-[var(--bg)] bg-[var(--accent)]"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               <span className="relative z-10">VIEW PROJECTS ↗</span>
@@ -251,7 +251,7 @@ export function Hero() {
               href="/cv.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 font-mono text-sm tracking-widest uppercase border-2 border-white/20 text-[var(--text-muted)] hover:border-[var(--text)] hover:text-[var(--text)] transition-all duration-300"
+              className="px-8 py-4 font-mono text-sm tracking-widest uppercase border-2 border-white/20 text-[var(--text-muted)] hover:border-[var(--text)] hover:text-[var(--text)] transition-[border-color,color,opacity] duration-300"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               DOWNLOAD CV

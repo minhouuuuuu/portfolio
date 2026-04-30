@@ -33,14 +33,18 @@ function WebGLVisual({ accent }: { accent: string }) {
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Animated wireframe grid */}
-      <div
-        className="absolute inset-0 opacity-25"
-        style={{
-          backgroundImage: `linear-gradient(${accent}20 1px, transparent 1px), linear-gradient(90deg, ${accent}20 1px, transparent 1px)`,
-          backgroundSize: "32px 32px",
-          animation: "svc-gridMove 12s linear infinite",
-        }}
-      />
+      <div className="absolute inset-0 opacity-25 overflow-hidden">
+        <div
+          className="absolute"
+          style={{
+            inset: "-32px",
+            backgroundImage: `linear-gradient(${accent}20 1px, transparent 1px), linear-gradient(90deg, ${accent}20 1px, transparent 1px)`,
+            backgroundSize: "32px 32px",
+            animation: "svc-gridMove 12s linear infinite",
+            willChange: "transform",
+          }}
+        />
+      </div>
       {/* Outer orbiting ring */}
       <div
         className="absolute rounded-full"
@@ -446,8 +450,8 @@ export function Services() {
 
       <style>{`
         @keyframes svc-gridMove {
-          from { background-position: 0 0; }
-          to { background-position: 32px 32px; }
+          from { transform: translate(0, 0); }
+          to { transform: translate(32px, 32px); }
         }
         @keyframes svc-rotateSlow {
           from { transform: translate(-50%, -50%) rotate(0deg); }

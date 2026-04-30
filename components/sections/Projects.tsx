@@ -2,7 +2,6 @@
 
 import { useRef, useEffect } from 'react'
 import { TiltCard } from '@/components/ui/TiltCard'
-import { MagneticButton } from '@/components/ui/MagneticButton'
 import { PERSONAL_INFO, PROJECTS } from '@/lib/constants'
 
 export function Projects() {
@@ -14,69 +13,68 @@ export function Projects() {
     if (!sectionRef.current || !trackRef.current) return
     let ctx: { revert(): void } | undefined
 
-    Promise.all([
-      import('gsap'),
-      import('gsap/ScrollTrigger'),
-    ]).then(([{ gsap }, { ScrollTrigger }]) => {
-      gsap.registerPlugin(ScrollTrigger)
-      ctx = gsap.context(() => {
-        // Title reveal
-        gsap.fromTo(
-          titleRef.current?.children ?? [],
-          { y: 60, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.1,
-            duration: 0.9,
-            ease: 'expo.out',
-            scrollTrigger: {
-              trigger: titleRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          },
-        )
-
-        // Horizontal scroll
-        const track = trackRef.current!
-        const cards = track.querySelectorAll('.project-card')
-        const totalWidth = track.scrollWidth - window.innerWidth
-
-        gsap.to(track, {
-          x: () => -totalWidth,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: () => `+=${totalWidth + window.innerWidth * 0.5}`,
-            scrub: 1,
-            pin: true,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        })
-
-        // Individual card entrance (rotateY)
-        cards.forEach((card) => {
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
+      ([{ gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger)
+        ctx = gsap.context(() => {
+          // Title reveal
           gsap.fromTo(
-            card,
-            { rotateY: 60, opacity: 0 },
+            titleRef.current?.children ?? [],
+            { y: 60, opacity: 0 },
             {
-              rotateY: 0,
+              y: 0,
               opacity: 1,
+              stagger: 0.1,
               duration: 0.9,
               ease: 'expo.out',
               scrollTrigger: {
-                trigger: card,
-                start: 'left 90%',
+                trigger: titleRef.current,
+                start: 'top 80%',
                 toggleActions: 'play none none reverse',
               },
             },
           )
-        })
-      }, sectionRef)
-    })
+
+          // Horizontal scroll
+          const track = trackRef.current!
+          const cards = track.querySelectorAll('.project-card')
+          const totalWidth = track.scrollWidth - window.innerWidth
+
+          gsap.to(track, {
+            x: () => -totalWidth,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top top',
+              end: () => `+=${totalWidth + window.innerWidth * 0.5}`,
+              scrub: 1,
+              pin: true,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          })
+
+          // Individual card entrance (rotateY)
+          cards.forEach((card) => {
+            gsap.fromTo(
+              card,
+              { rotateY: 60, opacity: 0 },
+              {
+                rotateY: 0,
+                opacity: 1,
+                duration: 0.9,
+                ease: 'expo.out',
+                scrollTrigger: {
+                  trigger: card,
+                  start: 'left 90%',
+                  toggleActions: 'play none none reverse',
+                },
+              },
+            )
+          })
+        }, sectionRef)
+      },
+    )
 
     return () => ctx?.revert()
   }, [])
@@ -119,7 +117,7 @@ export function Projects() {
       <div className="overflow-hidden">
         <div
           ref={trackRef}
-          className="horizontal-scroll-container gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-[max(1.5rem,env(safe-area-inset-right))] pb-16 pt-4"
+          className="horizontal-scroll-container gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-[max(1.5rem,env(safe-area-inset-right))] pb-32 md:pb-16 pt-4"
           style={{ width: 'max-content' }}
         >
           {PROJECTS.map((project, i) => (
@@ -138,14 +136,13 @@ function ProjectCard({
   project: (typeof PROJECTS)[number]
   index: number
 }) {
-  const isComingSoon =
-    'comingSoon' in project && project.comingSoon === true
+  const isComingSoon = 'comingSoon' in project && project.comingSoon === true
   const projectLink = isComingSoon
     ? null
     : (project.link ?? PERSONAL_INFO.portfolio)
 
-  return (
-    <TiltCard className="project-card shrink-0 w-[min(85vw,420px)] h-[520px]">
+  const cardInner = (
+    <TiltCard className={projectLink ? 'w-full h-full' : 'project-card shrink-0 w-[min(85vw,420px)] h-[520px]'}>
       <div
         className="relative w-full h-full overflow-hidden border border-(--border) group"
         style={{ background: 'var(--surface)' }}
@@ -222,34 +219,37 @@ function ProjectCard({
             {isComingSoon || !projectLink ? (
               <span
                 className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 opacity-50 cursor-default"
-                style={{
-                  color: project.color,
-                  fontFamily: 'var(--font-mono)',
-                }}
+                style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
               >
                 SOON
               </span>
             ) : (
-              <MagneticButton strength={0.2}>
-                <a
-                  href={projectLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 transition-colors duration-300 hover:bg-current group/btn"
-                  style={{
-                    color: project.color,
-                    fontFamily: 'var(--font-mono)',
-                  }}
-                >
-                  <span className="transition-colors duration-300 group-hover/btn:text-(--bg)">
-                    VISIT ↗
-                  </span>
-                </a>
-              </MagneticButton>
+              <span
+                className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5"
+                style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
+              >
+                VISIT ↗
+              </span>
             )}
           </div>
         </div>
       </div>
     </TiltCard>
   )
+
+  if (projectLink) {
+    return (
+      <a
+        href={projectLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="project-card shrink-0 w-[min(85vw,420px)] h-[520px] block cursor-pointer"
+        style={{ textDecoration: 'none', color: 'inherit' }}
+      >
+        {cardInner}
+      </a>
+    )
+  }
+
+  return cardInner
 }
