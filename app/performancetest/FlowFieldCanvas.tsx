@@ -342,7 +342,7 @@ export function FlowFieldCanvas({ onFpsUpdate }: Props) {
         scene.fog = new THREE.FogExp2(0x0a0318, 0.015)
 
         // ── Post-processing ────────────────────────────────────────────────
-        const postProcessing = new THREE.PostProcessing(renderer)
+        const postProcessing = new THREE.RenderPipeline(renderer)
         const scenePass = pass(scene, camera)
         scenePass.setMRT(mrt({ output, emissive }))
         const scenePassColor = scenePass.getTextureNode('output')
@@ -351,11 +351,12 @@ export function FlowFieldCanvas({ onFpsUpdate }: Props) {
         postProcessing.outputNode = scenePassColor.add(bloomPass)
 
         // ── Animate ────────────────────────────────────────────────────────
-        const clock = new THREE.Clock()
+        const clock = new THREE.Timer()
         let fpsFrames = 0
         let fpsTime = performance.now()
 
         function animate() {
+          clock.update()
           const dt = clock.getDelta()
           uTime.value += dt
           uDeltaTime.value = dt

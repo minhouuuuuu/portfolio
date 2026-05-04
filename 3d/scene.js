@@ -506,8 +506,9 @@ document.body.appendChild(fpsDiv);
 let fpsFrames = 0, fpsTime = performance.now();
 
 // --- Animate ---
-const clock = new THREE.Clock();
+const clock = new THREE.Timer();
 function animate() {
+  clock.update();
   const dt = clock.getDelta();
   uTime.value += dt;
   uDeltaTime.value = dt;
