@@ -44,7 +44,7 @@ export function Projects() {
             ease: 'none',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top top',
+              start: 'top 10%',
               end: () => `+=${track.scrollWidth - window.innerWidth}`,
               scrub: 1,
               pin: true,
@@ -95,10 +95,10 @@ export function Projects() {
       </div>
 
       {/* Horizontal scroll track — vertically centered in the viewport */}
-      <div className="absolute inset-0 flex items-center overflow-hidden">
+      <div className="absolute inset-0 flex items-center overflow-hidden pt-2">
         <div
           ref={trackRef}
-          className="flex gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-12"
+          className="flex gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-8"
           style={{ width: 'max-content' }}
         >
           {PROJECTS.map((project, i) => (

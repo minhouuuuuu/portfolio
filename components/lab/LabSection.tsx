@@ -257,6 +257,7 @@ export function LabSection() {
     let tl: ReturnType<GsapInstance['timeline']> | undefined
 
     import('gsap').then(({ gsap }) => {
+      if (!hintRef.current) return
       tl = gsap.timeline({ repeat: -1, yoyo: true })
       tl.to(hintRef.current, {
         opacity: 0.3,
@@ -539,7 +540,7 @@ export function LabSection() {
             className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-(--accent) text-(--bg) bg-(--accent) inline-block"
             style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
           >
-            <span className="relative z-10">WANNA SEE MORE? →</span>
+            <span className="relative z-10">WANNA SEE MORE?</span>
             <span
               className="absolute inset-0 bg-transparent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 border border-(--accent)"
               style={{ transformOrigin: 'left' }}
@@ -555,7 +556,7 @@ export function LabSection() {
             style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
           >
             <span className="relative z-10 group-hover:text-(--bg) transition-colors duration-300">
-              PERFORMANCE TEST ⚡
+              PERFORMANCE TEST
             </span>
             <span
               className="absolute inset-0 bg-(--accent) origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
