@@ -69,7 +69,7 @@ export function Projects() {
       {/* Title — absolute so it doesn't add to the section's scroll height */}
       <div
         ref={titleRef}
-        className="absolute top-0 left-0 right-0 max-w-6xl mx-auto px-6 pt-16 z-10 pointer-events-none"
+        className="absolute top-0 left-0 right-0 max-w-6xl mx-auto px-6 pt-10 md:pt-16 z-10 pointer-events-none"
       >
         <div
           className="flex items-center gap-3 mb-4"
@@ -87,7 +87,7 @@ export function Projects() {
           </span>
         </div>
         <h2
-          className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
+          className="font-display text-4xl md:text-6xl lg:text-7xl font-black leading-none uppercase"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           PROJECTS
@@ -95,7 +95,7 @@ export function Projects() {
       </div>
 
       {/* Horizontal scroll track — vertically centered in the viewport */}
-      <div className="absolute inset-0 flex items-center overflow-hidden pt-2">
+      <div className="absolute inset-0 flex items-center overflow-hidden pt-4 md:pt-2">
         <div
           ref={trackRef}
           className="flex gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-8"
@@ -144,7 +144,7 @@ function ProjectCard({
 
         {/* Number — large background */}
         <span
-          className="absolute bottom-4 right-6 font-display text-[8rem] font-bold leading-none select-none pointer-events-none"
+          className="absolute bottom-4 right-6 font-display text-[5rem] md:text-[8rem] font-bold leading-none select-none pointer-events-none"
           style={{
             fontFamily: 'var(--font-display)',
             color: project.color,
@@ -156,7 +156,7 @@ function ProjectCard({
         </span>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between h-full p-8">
+        <div className="relative z-10 flex flex-col justify-between h-full p-5 md:p-8">
           {/* Top meta */}
           <div>
             <div
@@ -224,7 +224,7 @@ function ProjectCard({
         href={projectLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="project-card shrink-0 w-[min(85vw,420px)] h-[520px] block cursor-pointer"
+        className="project-card shrink-0 w-[min(80vw,380px)] h-[min(65vh,520px)] block cursor-pointer"
         style={{ textDecoration: 'none', color: 'inherit' }}
       >
         {cardInner}
@@ -233,7 +233,7 @@ function ProjectCard({
   }
 
   return (
-    <div className="project-card shrink-0 w-[min(85vw,420px)] h-[520px]">
+    <div className="project-card shrink-0 w-[min(80vw,380px)] h-[min(65vh,520px)]">
       {cardInner}
     </div>
   )
