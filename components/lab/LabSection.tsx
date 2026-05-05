@@ -335,7 +335,7 @@ export function LabSection() {
             className="font-display text-5xl md:text-7xl font-black leading-none uppercase mb-3"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            In motions.
+            In motions
           </h2>
 
           {/* Subtitle */}
