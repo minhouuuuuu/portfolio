@@ -43,10 +43,18 @@ export class GenerativeFlowField {
     this.init()
   }
 
+  private makeSeededPrng(seed: number): () => number {
+    let s = seed
+    return () => {
+      s = (s * 16807 + 0) % 2147483647
+      return (s - 1) / 2147483646
+    }
+  }
+
   private async init() {
     // Dynamic import — only loaded on demand
     const { createNoise3D } = await import('simplex-noise')
-    this.simplex = { noise3D: createNoise3D(() => this.noiseSeed) }
+    this.simplex = { noise3D: createNoise3D(this.makeSeededPrng(this.noiseSeed)) }
 
     if (this.destroyed) return
 
@@ -150,7 +158,7 @@ export class GenerativeFlowField {
     this.noiseTime = 0
     if (this.simplex) {
       import('simplex-noise').then(({ createNoise3D }) => {
-        this.simplex = { noise3D: createNoise3D(() => this.noiseSeed) }
+        this.simplex = { noise3D: createNoise3D(this.makeSeededPrng(this.noiseSeed)) }
       })
     }
     this.clearCanvas()
