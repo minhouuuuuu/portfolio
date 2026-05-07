@@ -175,7 +175,8 @@ export class PhysicsParticles {
     const w = this.cssW
     const h = this.cssH
 
-    this.engine = Engine.create({ gravity: { x: 0, y: 1.2 } })
+    const isMobileGravity = window.innerWidth < 768
+    this.engine = Engine.create({ gravity: { x: 0, y: isMobileGravity ? 3 : 1.2 } })
     this.runner = Runner.create()
 
     // Walls — thick enough that fast bodies don't tunnel through
@@ -188,8 +189,9 @@ export class PhysicsParticles {
     const isMobile = window.innerWidth < 768
     const minR = isMobile ? 18 : 24
     const maxR = isMobile ? 30 : 40
+    const count = isMobile ? 40 : 80
 
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < count; i++) {
       const radius = minR + Math.random() * (maxR - minR)
       const x = 60 + Math.random() * (w - 120)
       const y = -50 - Math.random() * h * 1.5
