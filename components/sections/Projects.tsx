@@ -1,13 +1,16 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { TiltCard } from '@/components/ui/TiltCard'
 import { PERSONAL_INFO, PROJECTS } from '@/lib/constants'
+import { useLocale } from '@/components/providers/LocaleProvider'
 
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
+  const { t, locale } = useLocale()
 
   useEffect(() => {
     if (!sectionRef.current || !trackRef.current) return
@@ -52,6 +55,28 @@ export function Projects() {
               invalidateOnRefresh: true,
             },
           })
+
+          // Per-card image parallax — the image drifts opposite to the track
+          // motion so each card feels like it has depth as it scrolls past.
+          const images =
+            track.querySelectorAll<HTMLElement>('[data-parallax-img]')
+          images.forEach((img) => {
+            gsap.fromTo(
+              img,
+              { xPercent: -8 },
+              {
+                xPercent: 8,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: sectionRef.current,
+                  start: 'top 10%',
+                  end: () => `+=${track.scrollWidth - window.innerWidth}`,
+                  scrub: true,
+                  invalidateOnRefresh: true,
+                },
+              },
+            )
+          })
         }, sectionRef)
       },
     )
@@ -83,14 +108,14 @@ export function Projects() {
             className="text-xs tracking-[0.3em] uppercase"
             style={{ color: 'var(--text-muted)' }}
           >
-            SELECTED WORK
+            {t.projects.label}
           </span>
         </div>
         <h2
           className="font-display text-4xl md:text-6xl lg:text-7xl font-black leading-none uppercase"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          PROJECTS
+          {t.projects.title}
         </h2>
       </div>
 
@@ -102,7 +127,14 @@ export function Projects() {
           style={{ width: 'max-content' }}
         >
           {PROJECTS.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={i}
+              locale={locale}
+              visitLabel={t.projects.visit}
+              soonLabel={t.projects.soon}
+            />
           ))}
         </div>
       </div>
@@ -113,110 +145,158 @@ export function Projects() {
 function ProjectCard({
   project,
   index,
+  locale,
+  visitLabel,
+  soonLabel,
 }: {
   project: (typeof PROJECTS)[number]
   index: number
+  locale: 'en' | 'fr'
+  visitLabel: string
+  soonLabel: string
 }) {
   const isComingSoon = 'comingSoon' in project && project.comingSoon === true
   const projectLink = isComingSoon
     ? null
     : (project.link ?? PERSONAL_INFO.portfolio)
 
+  const description =
+    typeof project.description === 'string'
+      ? project.description
+      : project.description[locale]
+  const role =
+    project.role && typeof project.role !== 'string'
+      ? project.role[locale]
+      : undefined
+
   const cardInner = (
     <TiltCard className="w-full h-full">
       <div
-        className="relative w-full h-full overflow-hidden border border-(--border) group"
-        style={{ background: 'var(--surface)' }}
+        className="relative w-full h-full overflow-hidden border group"
+        style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
       >
-        {/* Project image / gradient */}
-        <div
-          className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-          style={{
-            background: `linear-gradient(135deg, ${project.color}18 0%, ${project.color}08 50%, var(--surface) 100%)`,
-          }}
-        />
-
-        {/* Color accent top bar */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[2px]"
-          style={{ backgroundColor: project.color }}
-        />
-
-        {/* Number — large background */}
-        <span
-          className="absolute bottom-4 right-6 font-display text-[5rem] md:text-[8rem] font-bold leading-none select-none pointer-events-none"
-          style={{
-            fontFamily: 'var(--font-display)',
-            color: project.color,
-            opacity: 0.06,
-            lineHeight: 1,
-          }}
-        >
-          {String(index + 1).padStart(2, '0')}
-        </span>
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between h-full p-5 md:p-8">
-          {/* Top meta */}
-          <div>
+        {/* ── Visual area ─────────────────────────────────────────────── */}
+        <div className="relative w-full overflow-hidden h-[52%] md:h-[56%]">
+          {project.image ? (
             <div
-              className="font-mono text-xs tracking-[0.2em] uppercase mb-4"
+              data-parallax-img
+              className="absolute inset-0 will-change-transform"
+              style={{ scale: 1.18 }}
+            >
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                sizes="(max-width: 768px) 80vw, 560px"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                priority={index < 2}
+              />
+            </div>
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(135deg, ${project.color}33 0%, ${project.color}11 50%, var(--surface) 100%)`,
+              }}
+            />
+          )}
+
+          {/* Readability gradient at the bottom of the image */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(to top, var(--surface) 4%, transparent 100%)',
+            }}
+          />
+
+          {/* Color accent top bar */}
+          <div
+            className="absolute top-0 left-0 right-0 h-[2px] z-10"
+            style={{ backgroundColor: project.color }}
+          />
+
+          {/* Year — top right over the image */}
+          <span
+            className="absolute top-3 right-4 z-10 font-mono text-[10px] tracking-[0.25em] uppercase px-2 py-1"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              color: project.color,
+              background: 'color-mix(in srgb, var(--bg) 55%, transparent)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            {project.year}
+          </span>
+        </div>
+
+        {/* ── Content area ────────────────────────────────────────────── */}
+        <div className="relative z-10 flex flex-col h-[48%] md:h-[44%] p-5 md:p-7">
+          {/* Role / scope */}
+          {role && (
+            <span
+              className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2"
               style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
             >
-              {project.year}
-            </div>
-            <div className="flex flex-wrap gap-2 mb-6">
-              {project.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="font-mono text-[10px] tracking-wider px-2 py-1 border"
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+              {role}
+            </span>
+          )}
+
+          <h3
+            className="font-display text-2xl md:text-3xl font-black mb-2 uppercase leading-tight"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {project.title}
+          </h3>
+
+          <p
+            className="text-sm leading-relaxed mb-4 line-clamp-3"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            {description}
+          </p>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-4 mt-auto">
+            {project.tags.map((tag) => (
+              <span
+                key={tag}
+                className="font-mono text-[10px] tracking-wider px-2 py-1 border"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                {tag}
+              </span>
+            ))}
           </div>
 
-          {/* Bottom content */}
-          <div>
-            <h3
-              className="font-display text-3xl font-black mb-3 uppercase leading-tight"
-              style={{ fontFamily: 'var(--font-display)' }}
+          {/* CTA */}
+          {isComingSoon || !projectLink ? (
+            <span
+              className="inline-flex w-fit items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 opacity-50 cursor-default"
+              style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
             >
-              {project.title}
-            </h3>
-            <p
-              className="text-sm leading-relaxed mb-6 max-w-[280px]"
-              style={{ color: 'var(--text-muted)' }}
+              {soonLabel}
+            </span>
+          ) : (
+            <span
+              className="inline-flex w-fit items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 transition-colors duration-300"
+              style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
             >
-              {project.description}
-            </p>
-
-            {isComingSoon || !projectLink ? (
-              <span
-                className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 opacity-50 cursor-default"
-                style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
-              >
-                SOON
-              </span>
-            ) : (
-              <span
-                className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5"
-                style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
-              >
-                VISIT ↗
-              </span>
-            )}
-          </div>
+              {visitLabel} ↗
+            </span>
+          )}
         </div>
       </div>
     </TiltCard>
   )
+
+  // Wider landscape-leaning cards on desktop to give the visuals room to breathe.
+  const sizeClasses =
+    'project-card shrink-0 w-[min(82vw,360px)] md:w-[min(48vw,560px)] h-[min(72vh,560px)]'
 
   if (projectLink) {
     return (
@@ -224,7 +304,7 @@ function ProjectCard({
         href={projectLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="project-card shrink-0 w-[min(80vw,380px)] h-[min(65vh,520px)] block cursor-pointer"
+        className={`${sizeClasses} block cursor-pointer`}
         style={{ textDecoration: 'none', color: 'inherit' }}
       >
         {cardInner}
@@ -232,9 +312,5 @@ function ProjectCard({
     )
   }
 
-  return (
-    <div className="project-card shrink-0 w-[min(80vw,380px)] h-[min(65vh,520px)]">
-      {cardInner}
-    </div>
-  )
+  return <div className={sizeClasses}>{cardInner}</div>
 }

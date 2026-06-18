@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 const SERVICES = [
   {
@@ -233,9 +234,13 @@ function EngineeringVisual({ accent }: { accent: string }) {
 function ServiceCard({
   service,
   index,
+  title,
+  description,
 }: {
   service: (typeof SERVICES)[0];
   index: number;
+  title: string;
+  description: string;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -327,14 +332,14 @@ function ServiceCard({
           className="font-display text-2xl font-black"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          {service.title}
+          {title}
         </h3>
 
         <p
           className="text-sm leading-relaxed flex-1"
           style={{ color: "var(--text-muted)" }}
         >
-          {service.description}
+          {description}
         </p>
 
         {/* Tools */}
@@ -364,6 +369,7 @@ function ServiceCard({
 export function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -419,14 +425,14 @@ export function Services() {
               className="text-xs tracking-[0.3em] uppercase"
               style={{ color: "var(--text-muted)" }}
             >
-              WHAT I CRAFT
+              {t.services.label}
             </span>
           </div>
           <h2
             className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            SERVICES
+            {t.services.title}
           </h2>
           <h2
             className="font-display text-5xl md:text-7xl font-black leading-none uppercase"
@@ -436,14 +442,20 @@ export function Services() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            &amp; CRAFT
+            {t.services.titleStroke}
           </h2>
         </div>
 
         {/* Cards — separated by 1px border using gap + bg trick */}
         <div className="grid md:grid-cols-3 gap-px" style={{ background: "var(--border)" }}>
           {SERVICES.map((service, i) => (
-            <ServiceCard key={service.id} service={service} index={i} />
+            <ServiceCard
+              key={service.id}
+              service={service}
+              index={i}
+              title={t.services.items[i]?.title ?? service.title}
+              description={t.services.items[i]?.description ?? service.description}
+            />
           ))}
         </div>
       </div>

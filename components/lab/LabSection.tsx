@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { useLabCanvas } from './useLabCanvas'
+import { useLocale } from '@/components/providers/LocaleProvider'
 
 type GsapInstance = typeof import('gsap').gsap
 
@@ -65,6 +66,7 @@ export function LabSection() {
   const instanceRef = useRef<ExperimentInstance | null>(null)
   const gsapRef = useRef<GsapInstance | null>(null)
   const { canvasRef } = useLabCanvas()
+  const { t } = useLocale()
 
   // ─── Detect mobile ────────────────────────────────────────────────────────
 
@@ -326,7 +328,7 @@ export function LabSection() {
               className="text-xs tracking-[0.3em] uppercase"
               style={{ color: 'var(--text-muted)' }}
             >
-              INTERACTIVE LAB
+              {t.lab.label}
             </span>
           </div>
 
@@ -335,7 +337,7 @@ export function LabSection() {
             className="font-display text-5xl md:text-7xl font-black leading-none uppercase mb-3"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            In motions
+            {t.lab.title}
           </h2>
 
           {/* Subtitle */}
@@ -346,7 +348,7 @@ export function LabSection() {
               fontFamily: 'var(--font-mono)',
             }}
           >
-            Touch it. Break it. Make it yours.
+            {t.lab.subtitle}
           </p>
 
           {/* ── Tab buttons ──────────────────────────────────────────────── */}
@@ -540,7 +542,7 @@ export function LabSection() {
             className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-(--accent) text-(--bg) bg-(--accent) inline-block"
             style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
           >
-            <span className="relative z-10">WANNA SEE MORE?</span>
+            <span className="relative z-10">{t.lab.wannaSeeMore}</span>
             <span
               className="absolute inset-0 bg-transparent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 border border-(--accent)"
               style={{ transformOrigin: 'left' }}
@@ -556,7 +558,7 @@ export function LabSection() {
             style={{ fontFamily: 'var(--font-mono)', textDecoration: 'none' }}
           >
             <span className="relative z-10 group-hover:text-(--bg) transition-colors duration-300">
-              PERFORMANCE TEST
+              {t.lab.performanceTest}
             </span>
             <span
               className="absolute inset-0 bg-(--accent) origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"

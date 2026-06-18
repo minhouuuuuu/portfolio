@@ -15,80 +15,111 @@ export const BIO = `Based in Strasbourg, France. Creative Developer at IZHAK INT
 I live at the intersection of code and creativity, building immersive digital experiences
 that push the boundaries of what's possible on the web.`
 
+// Per-project copy is localized. `description` carries both EN + FR;
+// the Projects component picks the active locale. `role` signals scope to
+// recruiters (agency client work vs. personal craft).
 export const PROJECTS = [
   {
     id: 1,
-    title: 'ASKAR SITE',
+    title: 'ASKAR',
     year: '2026',
-    tags: ['Next.js', 'Lenis', 'Framer Motion'],
-    description:
-      'Interactive website for a travel agency with immersive 3D animations',
+    tags: ['Next.js', 'Lenis', 'Framer Motion', '3D'],
+    role: { en: 'Personal · Lead front-end', fr: 'Personnel · Lead front-end' },
+    description: {
+      en: 'Immersive site for a travel agency — cinematic scroll transitions and 3D animations that turn browsing into a journey.',
+      fr: 'Site immersif pour une agence de voyage — transitions de scroll cinématiques et animations 3D qui transforment la navigation en voyage.',
+    },
     link: 'https://askar-site.vercel.app/',
     color: '#00e5a8',
-    image: null,
+    image: '/photo/askar.png',
   },
   {
     id: 2,
     title: 'ART',
     year: '2024',
     tags: ['Next.js', 'GSAP', 'Lenis'],
-    description: 'Personal art project with cinematic scroll experience',
+    role: { en: 'Personal · Creative R&D', fr: 'Personnel · R&D créative' },
+    description: {
+      en: 'A personal art direction study — cinematic scroll choreography pushing typography and motion as the main subject.',
+      fr: 'Une étude de direction artistique personnelle — chorégraphie de scroll cinématique où typographie et motion deviennent le sujet.',
+    },
     link: 'https://nguyen-minh-fashion.vercel.app',
     color: '#ff6b35',
-    image: null,
+    image: '/photo/art.png',
   },
   {
     id: 3,
-    title: 'LA BRASERIE LICORNE',
+    title: 'BRASSERIE LICORNE',
     year: '2025',
-    tags: ['PHP', 'Tailwind', 'JavaScript', 'Gsap', 'Internship'],
-    description: 'A historical brewery in France.',
+    tags: ['PHP', 'Tailwind', 'GSAP', 'Agency'],
+    role: {
+      en: 'Agency · Front-end & motion',
+      fr: 'Agence · Front-end & motion',
+    },
+    description: {
+      en: 'Production site for a historic French brewery. Custom GSAP animations carrying a 150-year heritage into a modern interface.',
+      fr: "Site en production pour une brasserie française historique. Animations GSAP sur-mesure portant 150 ans d'héritage dans une interface moderne.",
+    },
     link: 'https://www.brasserielicorne.com/',
     color: '#7b61ff',
-    image: null,
+    image: '/photo/licorne.png',
   },
   {
     id: 4,
     title: 'SALPA',
     year: '2025',
-    tags: ['PHP', 'Tailwind', 'JavaScript', 'Gsap', 'Internship'],
-    description:
-      'Website for a restauration company with a modern and clean design',
+    tags: ['PHP', 'Tailwind', 'GSAP', 'Agency'],
+    role: { en: 'Agency · Front-end', fr: 'Agence · Front-end' },
+    description: {
+      en: 'Production site for a catering company. Clean editorial layout with fluid scroll interactions, shipped for a real client.',
+      fr: 'Site en production pour une entreprise de restauration. Mise en page éditoriale épurée et interactions de scroll fluides, livré pour un vrai client.',
+    },
     link: 'https://salpa-restauration.fr/',
     color: '#c8ff00',
-    image: null,
+    image: '/photo/salpa.png',
   },
   {
     id: 5,
     title: 'GRILLI',
     year: '2023',
     tags: ['HTML', 'CSS', 'JavaScript'],
-    description: 'Website for a restaurant with a modern and clean design',
+    role: { en: 'Personal · Front-end', fr: 'Personnel · Front-end' },
+    description: {
+      en: 'A restaurant concept built from scratch in vanilla JS — proof that craft and polish do not require a framework.',
+      fr: 'Un concept de restaurant codé de zéro en JS vanilla — la preuve que le craft et la finition ne nécessitent pas de framework.',
+    },
     link: 'https://nguyen-minh-restaurant.vercel.app/',
     color: '#ff3d71',
-    image: null,
+    image: '/photo/grilli.png',
   },
   {
     id: 6,
     title: 'EPIC SAAS',
     year: '2023',
     tags: ['Next.js', 'Supabase', 'Tailwind'],
-    description: 'My first SaaS product with subscription management',
+    role: { en: 'Personal · Full-stack', fr: 'Personnel · Full-stack' },
+    description: {
+      en: 'A full SaaS product with authentication and subscription management — front to back, end to end.',
+      fr: "Un produit SaaS complet avec authentification et gestion d'abonnements — du front au back, de bout en bout.",
+    },
     link: 'https://nguyen-minh-saas-project.vercel.app/',
     color: '#00d4ff',
-    image: null,
+    image: '/photo/epic-saas.png',
   },
   {
     id: 7,
     title: 'NEXT DROP',
     year: 'SOON',
-    tags: ['WIP', 'Ideas', 'Lab'],
-    description:
-      'More wild projects on the way — in the meantime, dive into the Lab.',
+    tags: ['WIP', 'Lab'],
+    role: { en: 'In the works', fr: 'En préparation' },
+    description: {
+      en: 'More wild projects on the way — in the meantime, dive into the Lab.',
+      fr: "D'autres projets fous arrivent — en attendant, plonge dans le Lab.",
+    },
     link: null,
     comingSoon: true,
     color: '#e879f9',
-    image: null,
+    image: '/photo/upcoming.png',
   },
 ]
 

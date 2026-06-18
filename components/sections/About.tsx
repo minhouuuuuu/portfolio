@@ -4,10 +4,18 @@ import { useRef, useEffect } from "react";
 import { SplitText } from "@/components/ui/SplitText";
 import { CountUp } from "@/components/ui/CountUp";
 import { PERSONAL_INFO, STATS } from "@/lib/constants";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+  const { t } = useLocale();
+
+  const statLabels = [
+    t.about.stats.yrsExp,
+    t.about.stats.projects,
+    t.about.stats.countries,
+  ];
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -72,13 +80,14 @@ export function About() {
             className="text-xs tracking-[0.3em] uppercase"
             style={{ color: "var(--text-muted)" }}
           >
-            ABOUT ME
+            {t.about.label}
           </span>
         </div>
 
         {/* Headline — word split with GSAP reveal */}
         <SplitText
-          text="A developer who thinks like a designer."
+          key={t.about.headline}
+          text={t.about.headline}
           as="h2"
           splitBy="word"
           trigger="scroll"
@@ -94,25 +103,23 @@ export function About() {
               className="text-base leading-relaxed mb-4"
               style={{ color: "var(--text-muted)" }}
             >
-              Based in {PERSONAL_INFO.location}. Currently crafting
-              pixel-perfect experiences at{" "}
+              {t.about.body1Pre}
               <span style={{ color: "var(--accent)" }}>
                 {PERSONAL_INFO.company}
               </span>
-              .
+              {t.about.body1Post}
             </p>
             <p
               className="text-base leading-relaxed"
               style={{ color: "var(--text-muted)" }}
             >
-              I live at the intersection of code and creativity, turning complex
-              ideas into fluid digital experiences.
+              {t.about.body2}
             </p>
           </div>
 
           {/* Stats */}
           <div ref={statsRef} className="flex gap-12">
-            {STATS.map((stat) => (
+            {STATS.map((stat, i) => (
               <div key={stat.label} className="flex flex-col gap-1">
                 <span
                   className="font-display text-4xl font-black"
@@ -134,7 +141,7 @@ export function About() {
                     fontFamily: "var(--font-mono)",
                   }}
                 >
-                  {stat.label}
+                  {statLabels[i] ?? stat.label}
                 </span>
               </div>
             ))}

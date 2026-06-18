@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import { LocaleProvider } from '@/components/providers/LocaleProvider'
 import { LenisProvider } from '@/components/providers/LenisProvider'
 import { LoaderProvider } from '@/components/providers/LoaderContext'
 import { CustomCursor } from '@/components/layout/CustomCursor'
@@ -96,22 +98,18 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin=""
-        />
-      </head>
+    <html lang="en" suppressHydrationWarning>
       <body className="noise">
-        <LoaderProvider>
-          <LenisProvider>
-            <CustomCursor />
-            {children}
-          </LenisProvider>
-        </LoaderProvider>
+        <ThemeProvider>
+          <LocaleProvider>
+            <LoaderProvider>
+              <LenisProvider>
+                <CustomCursor />
+                {children}
+              </LenisProvider>
+            </LoaderProvider>
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

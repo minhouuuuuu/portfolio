@@ -4,6 +4,9 @@ import { useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { useLoader } from '@/components/providers/LoaderContext'
+import { useLocale } from '@/components/providers/LocaleProvider'
+import { CV_FILES } from '@/lib/i18n/dictionaries'
+import { PERSONAL_INFO } from '@/lib/constants'
 
 const Scene = dynamic(
   () => import('@/components/three/Scene').then((m) => m.Scene),
@@ -18,6 +21,7 @@ export function Hero() {
   const line2Ref = useRef<HTMLDivElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const ctaRef = useRef<HTMLDivElement>(null)
+  const trustRef = useRef<HTMLDivElement>(null)
 
   const { loaderDone } = useLoader()
 
@@ -29,6 +33,7 @@ export function Hero() {
         labelRef.current,
         subtitleRef.current,
         ctaRef.current,
+        trustRef.current,
         ...(line1Ref.current
           ? Array.from(line1Ref.current.querySelectorAll('.hero-letter'))
           : []),
@@ -98,6 +103,14 @@ export function Hero() {
             1.4,
           )
 
+          // Trust strip fades in last
+          tl.fromTo(
+            trustRef.current,
+            { y: 20, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.7 },
+            1.6,
+          )
+
           // Scroll parallax on text
           gsap.to(textRef.current, {
             y: '-25%',
@@ -115,6 +128,8 @@ export function Hero() {
 
     return () => ctx?.revert()
   }, [loaderDone])
+
+  const { t, locale } = useLocale()
 
   const handleScroll = (href: string) => {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
@@ -143,22 +158,47 @@ export function Hero() {
         ref={textRef}
         className="relative z-10 text-center px-6 max-w-6xl mx-auto"
       >
-        {/* Label */}
+        {/* Label + availability badge */}
         <div
           ref={labelRef}
-          className="flex items-center gap-3 justify-center mb-6"
+          className="flex flex-wrap items-center gap-x-4 gap-y-2 justify-center mb-6"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
-          <span
-            className="inline-block w-8 h-[1px]"
-            style={{ backgroundColor: 'var(--accent)' }}
-          />
-          <span
-            className="text-xs tracking-[0.3em] uppercase"
-            style={{ color: 'var(--accent)' }}
-          >
-            Creative Developer
-          </span>
+          <div className="flex items-center gap-3">
+            <span
+              className="inline-block w-8 h-[1px]"
+              style={{ backgroundColor: 'var(--accent)' }}
+            />
+            <span
+              className="text-xs tracking-[0.3em] uppercase"
+              style={{ color: 'var(--accent)' }}
+            >
+              {t.hero.label}
+            </span>
+          </div>
+
+          {PERSONAL_INFO.available && (
+            <span
+              className="inline-flex items-center gap-2 px-3 py-1 border text-[10px] tracking-[0.25em] uppercase"
+              style={{
+                borderColor: 'color-mix(in srgb, var(--accent) 40%, transparent)',
+                color: 'var(--text-muted)',
+                background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+              }}
+            >
+              <span className="relative flex w-2 h-2">
+                <span
+                  className="absolute inset-0 rounded-full animate-ping"
+                  style={{ backgroundColor: 'var(--accent)', opacity: 0.6 }}
+                />
+                <span
+                  className="relative w-2 h-2 rounded-full"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                />
+              </span>
+              {t.hero.available}
+            </span>
+          )}
         </div>
 
         {/* NGUYEN */}
@@ -226,9 +266,9 @@ export function Hero() {
             fontFamily: 'var(--font-body)',
           }}
         >
-          Crafting immersive web experiences
+          {t.hero.subtitle1}
           <br />
-          with code & creativity.
+          {t.hero.subtitle2}
         </p>
 
         {/* CTAs */}
@@ -242,7 +282,7 @@ export function Hero() {
               className="group relative md:px-8 px-6 py-4 font-mono text-sm tracking-widest uppercase overflow-hidden border border-[var(--accent)] text-[var(--bg)] bg-[var(--accent)]"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              <span className="relative z-10">VIEW PROJECTS ↗</span>
+              <span className="relative z-10">{t.hero.viewProjects}</span>
               <span
                 className="absolute inset-0 bg-transparent origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 border border-[var(--accent)]"
                 style={{ transformOrigin: 'left' }}
@@ -252,15 +292,67 @@ export function Hero() {
 
           <MagneticButton>
             <a
-              href="/cv.pdf"
+              href={CV_FILES[locale]}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 font-mono text-sm tracking-widest uppercase border-2 border-white/20 text-[var(--text-muted)] hover:border-[var(--text)] hover:text-[var(--text)] transition-[border-color,color,opacity] duration-300"
-              style={{ fontFamily: 'var(--font-mono)' }}
+              download
+              className="px-8 py-4 font-mono text-sm tracking-widest uppercase border-2 text-[var(--text-muted)] hover:text-[var(--text)] transition-[border-color,color,opacity] duration-300"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                borderColor: 'var(--border-strong)',
+              }}
             >
-              DOWNLOAD CV
+              {t.hero.downloadCv}
             </a>
           </MagneticButton>
+        </div>
+
+        {/* Trust strip — real clients & current agency */}
+        <div
+          ref={trustRef}
+          className="mt-14 flex flex-col items-center gap-3"
+        >
+          <span
+            className="font-mono text-[10px] tracking-[0.3em] uppercase"
+            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+          >
+            {t.hero.currentlyAt}{' '}
+            <a
+              href="https://izhak.fr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover-underline"
+              style={{ color: 'var(--accent)' }}
+            >
+              IZHAK INTERACT
+            </a>
+          </span>
+          <div
+            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[10px] tracking-[0.22em] uppercase"
+            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+          >
+            <span style={{ opacity: 0.5 }}>{t.hero.trustedBy}</span>
+            {[
+              { label: 'BRASSERIE LICORNE', href: 'https://www.brasserielicorne.com/' },
+              { label: 'SALPA', href: 'https://salpa-restauration.fr/' },
+              { label: 'BDR THERMEA', href: null },
+              { label: 'VIETTEL', href: null },
+            ].map(({ label, href }) =>
+              href ? (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover-underline transition-colors duration-300 hover:text-[var(--text)]"
+                >
+                  {label}
+                </a>
+              ) : (
+                <span key={label}>{label}</span>
+              ),
+            )}
+          </div>
         </div>
       </div>
 

@@ -4,10 +4,13 @@ import { useRef, useEffect } from 'react'
 import { GlitchText } from '@/components/ui/GlitchText'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { PERSONAL_INFO } from '@/lib/constants'
+import { useLocale } from '@/components/providers/LocaleProvider'
+import { ContactMap } from '@/components/sections/ContactMap'
 
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
+  const { t } = useLocale()
 
   useEffect(() => {
     if (!sectionRef.current) return
@@ -106,7 +109,7 @@ export function Contact() {
             className="text-xs tracking-[0.3em] uppercase"
             style={{ color: 'var(--text-muted)' }}
           >
-            LET&apos;S CREATE
+            {t.contact.label}
           </span>
           <span
             className="inline-block w-6 h-[1px]"
@@ -115,28 +118,28 @@ export function Contact() {
         </div>
 
         {/* Giant headline */}
-        <div>
+        <div className="w-full overflow-hidden">
           <h2
             className="font-display font-black leading-none uppercase"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 10.5vw, 7rem)',
+              fontSize: 'clamp(2.25rem, 8vw, 6rem)',
               lineHeight: 0.9,
             }}
           >
-            WORK
+            {t.contact.line1}
           </h2>
           <h2
             className="font-display font-black leading-none uppercase"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 10.5vw, 7rem)',
+              fontSize: 'clamp(2.25rem, 8vw, 6rem)',
               lineHeight: 0.9,
               WebkitTextStroke: '1px var(--text)',
               WebkitTextFillColor: 'transparent',
             }}
           >
-            TOGETHER
+            {t.contact.line2}
           </h2>
         </div>
 
@@ -157,6 +160,9 @@ export function Contact() {
             />
           </a>
         </div>
+
+        {/* Dotted map — where I am + open across Europe */}
+        <ContactMap />
 
         {/* Social links */}
         <div className="flex items-center justify-center gap-8 mb-16">
@@ -187,7 +193,7 @@ export function Contact() {
           className="font-mono text-xs tracking-[0.2em] uppercase"
           style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
         >
-          © 2026 Nguyen Minh — Crafted with ❤️
+          {t.contact.footer}
         </p>
       </div>
     </section>

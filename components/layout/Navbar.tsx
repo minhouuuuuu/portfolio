@@ -6,12 +6,25 @@ import { useScrollProgress } from "@/hooks/useScrollProgress";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import { NAV_LINKS } from "@/lib/constants";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { LanguageToggle } from "@/components/ui/LanguageToggle";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const progress = useScrollProgress();
-  
-  const sectionIds = useMemo(() => 
+  const { t } = useLocale();
+
+  // Localized labels keyed off the stable href so active-state logic is untouched.
+  const navLabels: Record<string, string> = {
+    "#about": t.nav.about,
+    "#services": t.nav.services,
+    "#projects": t.nav.projects,
+    "#lab": t.nav.lab,
+    "#contact": t.nav.contact,
+  };
+
+  const sectionIds = useMemo(() =>
     ["#hero", ...NAV_LINKS.map((link) => link.href)],
     []
   );
@@ -37,16 +50,16 @@ export function Navbar() {
         style={{
           width: `${progress * 100}%`,
           background: "var(--accent)",
-          boxShadow: "0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px rgba(200, 255, 0, 0.5)",
+          boxShadow: "0 0 10px var(--accent), 0 0 20px var(--accent)",
         }}
       />
 
       <motion.nav
-        className="flex items-center justify-between px-8 py-5 transition-all duration-500"
+        className="flex items-center justify-between px-6 md:px-8 py-5 transition-all duration-500"
         animate={{
           backgroundColor: scrolled
-            ? "rgba(5,5,5,0.85)"
-            : "rgba(5,5,5,0)",
+            ? "color-mix(in srgb, var(--bg) 85%, transparent)"
+            : "color-mix(in srgb, var(--bg) 0%, transparent)",
           backdropFilter: scrolled ? "blur(12px)" : "blur(0px)",
         }}
         transition={{ duration: 0.4 }}
@@ -81,7 +94,7 @@ export function Navbar() {
                   }`}
                   style={{ fontFamily: "var(--font-mono)" }}
                 >
-                  {link.label}
+                  {navLabels[link.href] ?? link.label}
                 </a>
                 {/* Active indicator */}
                 <motion.span
@@ -103,23 +116,27 @@ export function Navbar() {
           })}
         </ul>
 
-        {/* CTA */}
-        <MagneticButton>
-          <a
-            href="#contact"
-            onClick={(e) => handleAnchor(e, "#contact")}
-            className="relative px-5 py-2 font-mono text-xs tracking-widest uppercase border border-[var(--accent)] text-[var(--accent)] overflow-hidden group"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            <span className="relative z-10 transition-colors duration-300 group-hover:text-[var(--bg)]">
-              HIRE ME
-            </span>
-            <span
-              className="absolute inset-0 bg-[var(--accent)] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
-              style={{ transformOrigin: "left" }}
-            />
-          </a>
-        </MagneticButton>
+        {/* Right cluster: toggles + CTA */}
+        <div className="flex items-center gap-2.5 md:gap-3">
+          <LanguageToggle />
+          <ThemeToggle />
+          <MagneticButton>
+            <a
+              href="#contact"
+              onClick={(e) => handleAnchor(e, "#contact")}
+              className="relative hidden sm:inline-flex px-5 py-2 font-mono text-xs tracking-widest uppercase border border-[var(--accent)] text-[var(--accent)] overflow-hidden group"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              <span className="relative z-10 transition-colors duration-300 group-hover:text-[var(--on-accent)]">
+                {t.nav.hireMe}
+              </span>
+              <span
+                className="absolute inset-0 bg-[var(--accent)] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                style={{ transformOrigin: "left" }}
+              />
+            </a>
+          </MagneticButton>
+        </div>
       </motion.nav>
     </header>
   );

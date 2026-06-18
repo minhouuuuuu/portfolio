@@ -65,22 +65,59 @@
 }
 
 :root {
-  /* Design tokens (accessible as CSS vars outside Tailwind) */
+  /* Design tokens (accessible as CSS vars outside Tailwind).
+     Dark is the default theme — values below are the dark palette.
+     Light overrides live under `html.light` further down. */
   --bg: #050505;
   --bg-2: #0a0a0a;
   --surface: #111111;
   --surface-2: #1a1a1a;
   --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
   --text: #f0ede8;
   --text-muted: rgba(240, 237, 232, 0.57);
   --accent: #c8ff00;
   --accent-2: #ff6b35;
   --accent-3: #7b61ff;
+  --on-accent: #050505; /* text/icon color that sits on top of --accent */
   --gradient-1: linear-gradient(135deg, #c8ff00 0%, #7b61ff 100%);
 
   /* Easing */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+
+  color-scheme: dark;
+}
+
+/* ─── Light theme overrides ─────────────────────────────────────
+   Toggled by next-themes via `class="light"` on <html>.
+   Keeps the brand accent (lime) but flips the canvas to a warm off-white,
+   so the whole identity stays consistent — just inverted. */
+html.light {
+  --bg: #f4f1ea;
+  --bg-2: #ebe7dd;
+  --surface: #ffffff;
+  --surface-2: #f0ece2;
+  --border: rgba(10, 10, 10, 0.1);
+  --border-strong: rgba(10, 10, 10, 0.18);
+  --text: #161412;
+  --text-muted: rgba(22, 20, 18, 0.6);
+  --accent: #4d6b00; /* darker lime for contrast on light bg */
+  --accent-2: #d2521a;
+  --accent-3: #5a40d6;
+  --on-accent: #ffffff;
+  --gradient-1: linear-gradient(135deg, #4d6b00 0%, #5a40d6 100%);
+
+  color-scheme: light;
+}
+
+/* Smooth, deliberate theme crossfade on color-bearing properties only. */
+html.theme-ready body,
+html.theme-ready body * {
+  transition:
+    background-color 0.5s var(--ease-out-expo),
+    border-color 0.5s var(--ease-out-expo),
+    color 0.5s var(--ease-out-expo);
 }
 
 /* ─── Base ─────────────────────────────────────────────── */
