@@ -188,7 +188,7 @@ function ProjectCard({
                 alt={project.title}
                 fill
                 sizes="(max-width: 768px) 80vw, 560px"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                className="object-cover"
                 priority={index < 2}
               />
             </div>
@@ -215,19 +215,6 @@ function ProjectCard({
             className="absolute top-0 left-0 right-0 h-[2px] z-10"
             style={{ backgroundColor: project.color }}
           />
-
-          {/* Year — top right over the image */}
-          <span
-            className="absolute top-3 right-4 z-10 font-mono text-[10px] tracking-[0.25em] uppercase px-2 py-1"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              color: project.color,
-              background: 'color-mix(in srgb, var(--bg) 55%, transparent)',
-              backdropFilter: 'blur(4px)',
-            }}
-          >
-            {project.year}
-          </span>
         </div>
 
         {/* ── Content area ────────────────────────────────────────────── */}
