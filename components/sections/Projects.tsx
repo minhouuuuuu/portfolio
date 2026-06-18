@@ -120,8 +120,9 @@ export function Projects() {
         </h2>
       </div>
 
-      {/* Horizontal scroll track — vertically centered in the viewport */}
-      <div className="absolute inset-0 flex items-center overflow-hidden pt-4 md:pt-2">
+      {/* Horizontal scroll track — pushed below the pinned title so tall cards
+          on short screens never overlap it. */}
+      <div className="absolute inset-0 flex items-center overflow-hidden pt-32 md:pt-28 pb-6">
         <div
           ref={trackRef}
           className="flex gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-8"
@@ -171,13 +172,14 @@ function ProjectCard({
       : undefined
 
   const cardInner = (
-    <TiltCard className="w-full h-auto">
+    <TiltCard className="w-full h-full">
       <div
-        className="relative w-full overflow-hidden border group"
+        className="relative w-full h-full flex flex-col overflow-hidden border group"
         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
       >
-        {/* ── Visual area — fixed 16/10 ratio so screenshots keep their shape ── */}
-        <div className="relative w-full overflow-hidden aspect-16/10">
+        {/* ── Visual area — 16/10 ratio, but allowed to shrink so the card
+            never overflows the viewport on short screens ─────────────── */}
+        <div className="relative w-full overflow-hidden aspect-16/10 min-h-0 shrink">
           {project.image ? (
             <div
               data-parallax-img
@@ -219,7 +221,7 @@ function ProjectCard({
         </div>
 
         {/* ── Content area ────────────────────────────────────────────── */}
-        <div className="relative z-10 flex flex-col p-5 md:p-7 pb-6 md:pb-8">
+        <div className="relative z-10 flex flex-col shrink-0 p-5 md:p-7 pb-6 md:pb-8">
           {/* Role / scope */}
           {role && (
             <span
@@ -238,7 +240,7 @@ function ProjectCard({
           </h3>
 
           <p
-            className="text-sm leading-relaxed mb-5"
+            className="text-sm leading-relaxed mb-5 line-clamp-3"
             style={{ color: 'var(--text-muted)' }}
           >
             {description}
@@ -283,9 +285,10 @@ function ProjectCard({
   )
 
   // Wider landscape-leaning cards on desktop to give the visuals room to breathe.
-  // Height is auto so the image keeps its natural ratio and the content/CTA never clips.
+  // Height is capped to the viewport (leaving room for the pinned title); the image
+  // shrinks to absorb the constraint so content/CTA stay visible without overflow.
   const sizeClasses =
-    'project-card shrink-0 w-[min(82vw,360px)] md:w-[min(48vw,560px)] h-auto'
+    'project-card shrink-0 w-[min(82vw,360px)] md:w-[min(48vw,560px)] h-auto max-h-[min(78vh,620px)]'
 
   if (projectLink) {
     return (

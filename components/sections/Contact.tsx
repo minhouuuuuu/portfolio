@@ -190,7 +190,7 @@ export function Contact() {
 
         {/* Footer */}
         <p
-          className="font-mono text-xs tracking-[0.2em] uppercase"
+          className="font-mono text-xs tracking-[0.2em] uppercase pb-4"
           style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
         >
           {t.contact.footer}
