@@ -35,6 +35,20 @@ export const PROJECTS = [
   },
   {
     id: 2,
+    title: 'DROPBOX CLONE',
+    year: '2025',
+    tags: ['Next.js', 'TypeScript', 'Firebase', 'Clerk', 'Zustand'],
+    role: { en: 'Personal · Full-stack', fr: 'Personnel · Full-stack' },
+    description: {
+      en: 'A Dropbox-style file storage app — authentication, uploads, and folder management rebuilt from the ground up.',
+      fr: 'Une application de stockage de fichiers façon Dropbox — authentification, uploads et gestion de dossiers reconstruits de zéro.',
+    },
+    link: 'https://nguyen-minh-dropbox-clone.vercel.app/',
+    color: '#0061ff',
+    image: '/photo/dropbox.png',
+  },
+  {
+    id: 3,
     title: 'ART',
     year: '2024',
     tags: ['Next.js', 'GSAP', 'Lenis'],
@@ -48,7 +62,7 @@ export const PROJECTS = [
     image: '/photo/art.png',
   },
   {
-    id: 3,
+    id: 4,
     title: 'BRASSERIE LICORNE',
     year: '2025',
     tags: ['PHP', 'Tailwind', 'GSAP', 'Agency'],
@@ -65,7 +79,7 @@ export const PROJECTS = [
     image: '/photo/licorne.png',
   },
   {
-    id: 4,
+    id: 5,
     title: 'SALPA',
     year: '2025',
     tags: ['PHP', 'Tailwind', 'GSAP', 'Agency'],
@@ -79,7 +93,7 @@ export const PROJECTS = [
     image: '/photo/salpa.png',
   },
   {
-    id: 5,
+    id: 6,
     title: 'GRILLI',
     year: '2023',
     tags: ['HTML', 'CSS', 'JavaScript'],
@@ -93,7 +107,7 @@ export const PROJECTS = [
     image: '/photo/grilli.png',
   },
   {
-    id: 6,
+    id: 7,
     title: 'EPIC SAAS',
     year: '2023',
     tags: ['Next.js', 'Supabase', 'Tailwind'],
@@ -107,7 +121,7 @@ export const PROJECTS = [
     image: '/photo/epic-saas.png',
   },
   {
-    id: 7,
+    id: 8,
     title: 'NEXT DROP',
     year: 'SOON',
     tags: ['WIP', 'Lab'],
