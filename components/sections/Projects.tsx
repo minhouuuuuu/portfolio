@@ -58,8 +58,9 @@ export function Projects() {
 
           // Per-card image parallax — the image drifts opposite to the track
           // motion so each card feels like it has depth as it scrolls past.
-          const images =
-            track.querySelectorAll<HTMLElement>('[data-parallax-img]')
+          const images = track.querySelectorAll<HTMLElement>(
+            '[data-parallax-img]',
+          )
           images.forEach((img) => {
             gsap.fromTo(
               img,
@@ -170,13 +171,13 @@ function ProjectCard({
       : undefined
 
   const cardInner = (
-    <TiltCard className="w-full h-full">
+    <TiltCard className="w-full h-auto">
       <div
-        className="relative w-full h-full overflow-hidden border group"
+        className="relative w-full overflow-hidden border group"
         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
       >
-        {/* ── Visual area ─────────────────────────────────────────────── */}
-        <div className="relative w-full overflow-hidden h-[52%] md:h-[56%]">
+        {/* ── Visual area — fixed 16/10 ratio so screenshots keep their shape ── */}
+        <div className="relative w-full overflow-hidden aspect-16/10">
           {project.image ? (
             <div
               data-parallax-img
@@ -218,7 +219,7 @@ function ProjectCard({
         </div>
 
         {/* ── Content area ────────────────────────────────────────────── */}
-        <div className="relative z-10 flex flex-col h-[48%] md:h-[44%] p-5 md:p-7">
+        <div className="relative z-10 flex flex-col p-5 md:p-7 pb-6 md:pb-8">
           {/* Role / scope */}
           {role && (
             <span
@@ -237,14 +238,14 @@ function ProjectCard({
           </h3>
 
           <p
-            className="text-sm leading-relaxed mb-4 line-clamp-3"
+            className="text-sm leading-relaxed mb-5"
             style={{ color: 'var(--text-muted)' }}
           >
             {description}
           </p>
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-4 mt-auto">
+          <div className="flex flex-wrap gap-2 mb-5">
             {project.tags.map((tag) => (
               <span
                 key={tag}
@@ -282,8 +283,9 @@ function ProjectCard({
   )
 
   // Wider landscape-leaning cards on desktop to give the visuals room to breathe.
+  // Height is auto so the image keeps its natural ratio and the content/CTA never clips.
   const sizeClasses =
-    'project-card shrink-0 w-[min(82vw,360px)] md:w-[min(48vw,560px)] h-[min(72vh,560px)]'
+    'project-card shrink-0 w-[min(82vw,360px)] md:w-[min(48vw,560px)] h-auto'
 
   if (projectLink) {
     return (
