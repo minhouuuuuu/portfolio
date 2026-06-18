@@ -216,7 +216,7 @@ const fr: Dictionary = {
   },
   contact: {
     label: 'CRÉONS ENSEMBLE',
-    line1: 'TRAVAILLONS',
+    line1: 'ELABORONS',
     line2: 'ENSEMBLE',
     footer: '© 2026 Nguyen Minh — Façonné à Strasbourg',
     mapLabel: 'OÙ JE SUIS',
