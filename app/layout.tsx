@@ -100,6 +100,26 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="noise">
+        {/* Static black overlay — present in the initial SSR HTML so the page
+            never flashes before the loader covers it (FOUC fix). Rendered by
+            the server, so the inline script below is emitted as real HTML and
+            runs before paint (it is NOT inside a client component). */}
+        <div
+          id="ssr-loader-overlay"
+          aria-hidden
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9996,
+            backgroundColor: '#050505',
+            pointerEvents: 'none',
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var c=document.cookie.split('; ').find(function(r){return r.indexOf('loader_shown=')===0});if(c&&c.split('=')[1]==='1'){var o=document.getElementById('ssr-loader-overlay');if(o)o.remove();}}catch(e){}})();`,
+          }}
+        />
         <ThemeProvider>
           <LocaleProvider>
             <LoaderProvider>
