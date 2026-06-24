@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Mesh } from "three";
+import { Mesh, MeshStandardMaterial } from "three";
 
 interface GeomProps {
   position: [number, number, number];
@@ -12,7 +12,13 @@ interface GeomProps {
   color?: string;
   materialOpacity?: number;
   emissiveIntensity?: number;
+  /** Seconds to wait before this mesh starts building in (soft stagger). */
+  revealDelay?: number;
 }
+
+// Soft "expo.out" build-in: scale 0→1 and opacity 0→target over ~0.9s.
+const REVEAL_DURATION = 0.9;
+const expoOut = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
 function FloatingMesh({
   position,
@@ -22,15 +28,27 @@ function FloatingMesh({
   color = "#c8ff00",
   materialOpacity = 0.25,
   emissiveIntensity = 0.4,
+  revealDelay = 0,
   children,
 }: GeomProps & { children: React.ReactNode }) {
   const ref = useRef<Mesh>(null);
   const tRef = useRef(0);
+  const ageRef = useRef(0);
   const initY = position[1];
 
   useFrame((_, delta) => {
     if (!ref.current) return;
     tRef.current += delta;
+    ageRef.current += delta;
+
+    // Reveal progress, accounting for the per-mesh delay.
+    const p = expoOut(
+      Math.min(Math.max((ageRef.current - revealDelay) / REVEAL_DURATION, 0), 1),
+    );
+    ref.current.scale.setScalar(p);
+    const mat = ref.current.material as MeshStandardMaterial;
+    mat.opacity = materialOpacity * p;
+
     ref.current.rotation.x += rotationSpeed[0];
     ref.current.rotation.y += rotationSpeed[1];
     ref.current.rotation.z += rotationSpeed[2];
@@ -38,13 +56,13 @@ function FloatingMesh({
   });
 
   return (
-    <mesh ref={ref} position={position}>
+    <mesh ref={ref} position={position} scale={0}>
       {children}
       <meshStandardMaterial
         color={color}
         wireframe
         transparent
-        opacity={materialOpacity}
+        opacity={0}
         emissive={color}
         emissiveIntensity={emissiveIntensity}
       />
@@ -77,6 +95,7 @@ export function FloatingGeometry({ isMobile }: { isMobile: boolean }) {
         floatSpeed={0.7}
         floatAmp={0.25}
         color="#c8ff00"
+        revealDelay={0}
       >
         <torusKnotGeometry args={[0.5, 0.15, 128, 16]} />
       </FloatingMesh>
@@ -87,6 +106,7 @@ export function FloatingGeometry({ isMobile }: { isMobile: boolean }) {
         floatSpeed={0.9}
         floatAmp={0.35}
         color="#7b61ff"
+        revealDelay={0.15}
       >
         <icosahedronGeometry args={[0.7, 1]} />
       </FloatingMesh>
@@ -97,6 +117,7 @@ export function FloatingGeometry({ isMobile }: { isMobile: boolean }) {
         floatSpeed={1.1}
         floatAmp={0.2}
         color="#ff6b35"
+        revealDelay={0.3}
       >
         <octahedronGeometry args={[0.5, 0]} />
       </FloatingMesh>
@@ -109,6 +130,7 @@ export function FloatingGeometry({ isMobile }: { isMobile: boolean }) {
         color="#c8ff00"
         materialOpacity={torusMaterialOpacity}
         emissiveIntensity={torusEmissiveIntensity}
+        revealDelay={0.45}
       >
         <torusGeometry args={torusArgs} />
       </FloatingMesh>

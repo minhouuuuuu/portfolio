@@ -2,9 +2,11 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Points } from "three";
+import { Points, PointsMaterial } from "three";
 
 const PARTICLE_COUNT = 3000;
+const TARGET_OPACITY = 0.7;
+const FADE_DURATION = 1.4;
 
 export function ParticleField() {
   const meshRef = useRef<Points>(null);
@@ -43,6 +45,12 @@ export function ParticleField() {
     meshRef.current.rotation.y = t * 0.05;
     meshRef.current.rotation.x = Math.sin(t * 0.03) * 0.15;
     meshRef.current.rotation.z = m.x * 0.1;
+
+    // Gentle fade-in so the starfield doesn't snap in with the geometry.
+    const mat = meshRef.current.material as PointsMaterial;
+    if (mat.opacity < TARGET_OPACITY) {
+      mat.opacity = Math.min(TARGET_OPACITY, (t / FADE_DURATION) * TARGET_OPACITY);
+    }
   });
 
   return (
@@ -61,7 +69,7 @@ export function ParticleField() {
         size={0.012}
         vertexColors
         transparent
-        opacity={0.7}
+        opacity={0}
         sizeAttenuation
         depthWrite={false}
       />
