@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { useLoader } from '@/components/providers/LoaderContext'
@@ -24,15 +24,6 @@ export function Hero() {
   const trustRef = useRef<HTMLDivElement>(null)
 
   const { loaderDone } = useLoader()
-
-  // The 3D layer is held back so visitors first see the "flat" hero,
-  // then the floating geometry builds in ~1.2s later.
-  const [showScene, setShowScene] = useState(false)
-  useEffect(() => {
-    if (!loaderDone) return
-    const t = setTimeout(() => setShowScene(true), 1200)
-    return () => clearTimeout(t)
-  }, [loaderDone])
 
   // Pre-hide all animated elements while loader runs
   useEffect(() => {
@@ -150,8 +141,8 @@ export function Hero() {
       ref={sectionRef}
       className="relative h-[100svh] flex items-center justify-center overflow-hidden bg-[var(--bg)]"
     >
-      {/* Three.js 3D background — mounts after the flat hero is shown */}
-      {showScene && <Scene />}
+      {/* Three.js 3D background */}
+      <Scene />
 
       {/* Radial gradient overlay */}
       <div
