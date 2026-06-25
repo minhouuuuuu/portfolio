@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { monument, neueMachina } from './fonts'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { LocaleProvider } from '@/components/providers/LocaleProvider'
 import { LenisProvider } from '@/components/providers/LenisProvider'
@@ -98,7 +99,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${monument.variable} ${neueMachina.variable}`}
+    >
       {/* The body is server-rendered with a black background (var(--bg)), which
           covers the SSR→hydration gap on its own — no FOUC overlay needed. The
           first-visit PageLoader (z-9997) then covers the page; returning

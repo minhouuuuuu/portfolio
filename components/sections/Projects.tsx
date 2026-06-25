@@ -128,11 +128,10 @@ export function Projects() {
           className="flex gap-6 pl-[max(2rem,calc((100vw-80rem)/2))] pr-8"
           style={{ width: 'max-content' }}
         >
-          {PROJECTS.map((project, i) => (
+          {PROJECTS.map((project) => (
             <ProjectCard
               key={project.id}
               project={project}
-              index={i}
               locale={locale}
               visitLabel={t.projects.visit}
               soonLabel={t.projects.soon}
@@ -146,13 +145,11 @@ export function Projects() {
 
 function ProjectCard({
   project,
-  index,
   locale,
   visitLabel,
   soonLabel,
 }: {
   project: (typeof PROJECTS)[number]
-  index: number
   locale: 'en' | 'fr'
   visitLabel: string
   soonLabel: string
@@ -192,7 +189,7 @@ function ProjectCard({
                 fill
                 sizes="(max-width: 768px) 80vw, 560px"
                 className="object-cover"
-                priority={index < 2}
+                loading="lazy"
               />
             </div>
           ) : (

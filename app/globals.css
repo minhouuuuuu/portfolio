@@ -1,49 +1,8 @@
 @import "tailwindcss";
 
-/* ─── Local fonts ───────────────────────────────────────────── */
-@font-face {
-  font-family: 'PP Monument Extended';
-  src: url('/fonts/PPMonumentExtended-Light.otf') format('opentype');
-  font-weight: 300;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Monument Extended';
-  src: url('/fonts/PPMonumentExtended-Regular.otf') format('opentype');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Monument Extended';
-  src: url('/fonts/PPMonumentExtended-RegularItalic.otf') format('opentype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Monument Extended';
-  src: url('/fonts/PPMonumentExtended-Black.otf') format('opentype');
-  font-weight: 900;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Neue Machina';
-  src: url('/fonts/PPNeueMachina-InktrapLight.otf') format('opentype');
-  font-weight: 300;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Neue Machina';
-  src: url('/fonts/PPNeueMachina-InktrapRegular.otf') format('opentype');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'PP Neue Machina';
-  src: url('/fonts/PPNeueMachina-InktrapUltrabold.otf') format('opentype');
-  font-weight: 800;
-  font-display: swap;
-}
+/* Fonts are loaded and self-hosted via next/font/local (see app/fonts.ts),
+   which sets --font-display and --font-mono on <html> with metric-matched
+   fallbacks. The @theme tokens below consume those variables. */
 
 @theme {
   /* Colors */
@@ -58,10 +17,11 @@
   --color-accent-3: #7b61ff;
   --color-border: rgba(255, 255, 255, 0.06);
 
-  /* Fonts */
-  --font-display: 'PP Monument Extended', sans-serif;
-  --font-body: 'PP Neue Machina', monospace;
-  --font-mono: 'PP Neue Machina', monospace;
+  /* Fonts — consume the next/font/local variables set on <html>.
+     Fallbacks keep utilities working before hydration / if a var is missing. */
+  --font-display: var(--font-monument), sans-serif;
+  --font-body: var(--font-neue), monospace;
+  --font-mono: var(--font-neue), monospace;
 }
 
 :root {
@@ -263,6 +223,16 @@ button,
   display: flex;
   flex-direction: row;
   will-change: transform;
+}
+
+/* ─── Hero entrance pre-hide ────────────────────────────────
+   The hero's animated elements start invisible at the CSS level so there is
+   no flash of the static, fully-laid-out page before GSAP takes over on the
+   client. Once the entrance effect has set the GSAP start state, it adds
+   data-hero-ready and GSAP drives opacity from there. */
+#hero:not([data-hero-ready]) .hero-anim {
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* ─── Clip reveal animation ─────────────────────────────── */
