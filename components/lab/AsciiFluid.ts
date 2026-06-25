@@ -24,6 +24,7 @@ export class AsciiFluid {
 
   private raf = 0
   private destroyed = false
+  private paused = false
 
   // Grid dimensions (in cells)
   private cols = 0
@@ -152,7 +153,7 @@ export class AsciiFluid {
   // ─── Loop ─────────────────────────────────────────────────────────────────
 
   private loop = () => {
-    if (this.destroyed) return
+    if (this.destroyed || this.paused) return
 
     // Resize if canvas dimensions changed
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -209,6 +210,20 @@ export class AsciiFluid {
     this.canvas.addEventListener('mouseleave', this.onMouseLeave)
     this.canvas.addEventListener('touchmove', this.onTouchMove, { passive: false })
     this.canvas.addEventListener('touchend', this.onTouchEnd)
+  }
+
+  // ─── Pause / resume (off-screen idling) ──────────────────────────────────
+
+  pause() {
+    if (this.paused) return
+    this.paused = true
+    cancelAnimationFrame(this.raf)
+  }
+
+  resume() {
+    if (!this.paused || this.destroyed) return
+    this.paused = false
+    this.raf = requestAnimationFrame(this.loop)
   }
 
   // ─── Cleanup ──────────────────────────────────────────────────────────────

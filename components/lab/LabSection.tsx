@@ -43,6 +43,8 @@ type ExperimentId = (typeof EXPERIMENTS)[number]['id']
 
 interface ExperimentInstance {
   destroy: () => void
+  pause: () => void
+  resume: () => void
   regenerate?: () => void
   enableGyro?: () => void
 }
@@ -212,10 +214,45 @@ export function LabSection() {
     [canvasRef, isMobile, dismissHint],
   )
 
-  // Init first experiment on mount
+  // Lazily init the first experiment only when the Lab is about to enter the
+  // viewport, and pause/resume its render loop as it scrolls in and out of view
+  // (and on tab visibility). No GPU work happens while the Lab is off-screen.
+  const initedRef = useRef(false)
   useEffect(() => {
-    initExperiment('fluid')
+    const section = sectionRef.current
+    if (!section) return
+
+    const syncVisibility = (onScreen: boolean) => {
+      const visible = onScreen && document.visibilityState === 'visible'
+      if (visible) {
+        if (!initedRef.current) {
+          initedRef.current = true
+          initExperiment('fluid')
+        } else {
+          instanceRef.current?.resume()
+        }
+      } else {
+        instanceRef.current?.pause()
+      }
+    }
+
+    let onScreen = false
+    const onVisibility = () => syncVisibility(onScreen)
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting
+        syncVisibility(onScreen)
+      },
+      // Start a bit before the section reaches the viewport so it's ready.
+      { rootMargin: '200px 0px', threshold: 0 },
+    )
+    io.observe(section)
+    document.addEventListener('visibilitychange', onVisibility)
+
     return () => {
+      io.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
       instanceRef.current?.destroy()
       instanceRef.current = null
     }

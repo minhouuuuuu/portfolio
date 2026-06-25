@@ -22,6 +22,7 @@ export class GenerativeFlowField {
   private ctx: CanvasRenderingContext2D
   private raf = 0
   private destroyed = false
+  private paused = false
 
   private particles: Particle[] = []
   private noiseSeed = Math.random() * 10000
@@ -90,9 +91,21 @@ export class GenerativeFlowField {
   }
 
   private loop = () => {
-    if (this.destroyed) return
+    if (this.destroyed || this.paused) return
     this.raf = requestAnimationFrame(this.loop)
     this.tick()
+  }
+
+  pause() {
+    if (this.paused) return
+    this.paused = true
+    cancelAnimationFrame(this.raf)
+  }
+
+  resume() {
+    if (!this.paused || this.destroyed) return
+    this.paused = false
+    this.raf = requestAnimationFrame(this.loop)
   }
 
   private tick() {

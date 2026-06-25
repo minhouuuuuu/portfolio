@@ -36,6 +36,7 @@ export class PhysicsParticles {
   private runner!: MatterNS.Runner
   private raf = 0
   private destroyed = false
+  private paused = false
   private bodies: MatterNS.Body[] = []
   private bodyMeta: Map<MatterNS.Body, { label: string; color: string }> = new Map()
   private motionListener: ((e: DeviceMotionEvent) => void) | null = null
@@ -342,9 +343,31 @@ export class PhysicsParticles {
   // ─── Draw loop ────────────────────────────────────────────────────────────
 
   private drawLoop = () => {
-    if (this.destroyed) return
+    if (this.destroyed || this.paused) return
     this.raf = requestAnimationFrame(this.drawLoop)
     this.draw()
+  }
+
+  // ─── Pause / resume (off-screen idling) ──────────────────────────────────
+  // Stops both the draw RAF and the Matter physics runner so nothing steps
+  // while the Lab is scrolled out of view.
+
+  pause() {
+    if (this.paused) return
+    this.paused = true
+    cancelAnimationFrame(this.raf)
+    if (this.MatterLib && this.runner) {
+      this.MatterLib.Runner.stop(this.runner)
+    }
+  }
+
+  resume() {
+    if (!this.paused || this.destroyed) return
+    this.paused = false
+    if (this.MatterLib && this.runner && this.engine) {
+      this.MatterLib.Runner.run(this.runner, this.engine)
+    }
+    this.raf = requestAnimationFrame(this.drawLoop)
   }
 
   private draw() {
