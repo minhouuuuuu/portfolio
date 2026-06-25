@@ -39,9 +39,32 @@ export function MarqueeText({
       { x: to, duration, ease: "none", repeat: -1 }
     );
 
+    // Respect reduced-motion: settle to the start and don't run the loop.
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReduced) {
+      animation.progress(0).pause();
+      return () => {
+        animation.kill();
+      };
+    }
+
+    // Pause the loop while the marquee is scrolled out of view so it isn't
+    // repainting dozens of off-screen DOM nodes every frame.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) animation.play();
+        else animation.pause();
+      },
+      { threshold: 0 }
+    );
+    io.observe(track);
+
     // `animation.kill()` returns the Tween (for chaining), but React expects
     // the effect cleanup to return `void`.
     return () => {
+      io.disconnect();
       animation.kill();
     };
   }, [text, direction, speed]);
