@@ -24,28 +24,12 @@ export function Hero() {
   const trustRef = useRef<HTMLDivElement>(null)
 
   const { loaderDone } = useLoader()
+  const sceneRef = useRef<HTMLDivElement>(null)
 
-  // Pre-hide all animated elements while loader runs
-  useEffect(() => {
-    if (!sectionRef.current) return
-    import('gsap').then(({ gsap }) => {
-      const targets = [
-        labelRef.current,
-        subtitleRef.current,
-        ctaRef.current,
-        trustRef.current,
-        ...(line1Ref.current
-          ? Array.from(line1Ref.current.querySelectorAll('.hero-letter'))
-          : []),
-        ...(line2Ref.current
-          ? Array.from(line2Ref.current.querySelectorAll('.hero-letter'))
-          : []),
-      ].filter(Boolean)
-      if (targets.length) gsap.set(targets, { autoAlpha: 0 })
-    })
-  }, [])
-
-  // Entrance animation — fires after loader signals completion
+  // Entrance animation — runs on mount (no intro loader anymore). The hide and
+  // the timeline live in a single effect so elements are set to autoAlpha:0
+  // synchronously before the browser paints, then revealed in order. This
+  // removes the "static page then animation" flash entirely.
   useEffect(() => {
     if (!loaderDone || !sectionRef.current) return
     let ctx: { revert(): void } | undefined
@@ -54,9 +38,31 @@ export function Hero() {
       ([{ gsap }, { ScrollTrigger }]) => {
         gsap.registerPlugin(ScrollTrigger)
         ctx = gsap.context(() => {
+          const nguyenLetters =
+            line1Ref.current?.querySelectorAll('.hero-letter')
+          const minhLetters = line2Ref.current?.querySelectorAll('.hero-letter')
+
+          // 1. Hide everything up front so nothing flashes before the timeline.
+          const hideTargets = [
+            labelRef.current,
+            subtitleRef.current,
+            ctaRef.current,
+            trustRef.current,
+            ...(nguyenLetters ? Array.from(nguyenLetters) : []),
+            ...(minhLetters ? Array.from(minhLetters) : []),
+          ].filter(Boolean)
+          gsap.set(hideTargets, { autoAlpha: 0 })
+
+          // The 3D scene stays dark until the flat hero text has landed.
+          if (sceneRef.current) gsap.set(sceneRef.current, { autoAlpha: 0 })
+
+          // GSAP now owns visibility — release the CSS pre-hide so the
+          // timeline below can reveal elements in order.
+          sectionRef.current?.setAttribute('data-hero-ready', '')
+
           const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
 
-          // Label slides in from left
+          // 2. Label slides in from left
           tl.fromTo(
             labelRef.current,
             { x: -60, autoAlpha: 0 },
@@ -64,9 +70,7 @@ export function Hero() {
             0.2,
           )
 
-          // NGUYEN letters fall from top
-          const nguyenLetters =
-            line1Ref.current?.querySelectorAll('.hero-letter')
+          // 3. NGUYEN letters fall from top
           if (nguyenLetters) {
             tl.fromTo(
               nguyenLetters,
@@ -76,8 +80,7 @@ export function Hero() {
             )
           }
 
-          // MINH letters rise from bottom
-          const minhLetters = line2Ref.current?.querySelectorAll('.hero-letter')
+          // 4. MINH letters rise from bottom
           if (minhLetters) {
             tl.fromTo(
               minhLetters,
@@ -87,7 +90,7 @@ export function Hero() {
             )
           }
 
-          // Subtitle fade
+          // 5. Subtitle fade
           tl.fromTo(
             subtitleRef.current,
             { y: 30, autoAlpha: 0 },
@@ -95,7 +98,7 @@ export function Hero() {
             1.2,
           )
 
-          // CTAs slide up
+          // 6. CTAs slide up
           tl.fromTo(
             ctaRef.current,
             { y: 40, autoAlpha: 0 },
@@ -103,12 +106,19 @@ export function Hero() {
             1.4,
           )
 
-          // Trust strip fades in last
+          // 7. Trust strip fades in
           tl.fromTo(
             trustRef.current,
             { y: 20, autoAlpha: 0 },
             { y: 0, autoAlpha: 1, duration: 0.7 },
             1.6,
+          )
+
+          // 8. Finally, the 3D scene reveals behind the now-settled text.
+          tl.to(
+            sceneRef.current,
+            { autoAlpha: 1, duration: 1.2, ease: 'power2.out' },
+            1.8,
           )
 
           // Scroll parallax on text
@@ -141,8 +151,10 @@ export function Hero() {
       ref={sectionRef}
       className="relative h-[100svh] flex items-center justify-center overflow-hidden bg-[var(--bg)]"
     >
-      {/* Three.js 3D background */}
-      <Scene />
+      {/* Three.js 3D background — revealed after the flat hero text lands */}
+      <div ref={sceneRef} className="hero-anim absolute inset-0">
+        <Scene />
+      </div>
 
       {/* Radial gradient overlay */}
       <div
@@ -161,7 +173,7 @@ export function Hero() {
         {/* Label + availability badge */}
         <div
           ref={labelRef}
-          className="flex flex-wrap items-center gap-x-4 gap-y-2 justify-center mb-6"
+          className="hero-anim flex flex-wrap items-center gap-x-4 gap-y-2 justify-center mb-6"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
           <div className="flex items-center gap-3">
@@ -219,7 +231,7 @@ export function Hero() {
             {'NGUYEN'.split('').map((l, i) => (
               <span
                 key={i}
-                className="hero-letter inline-block"
+                className="hero-letter hero-anim inline-block"
                 style={{ willChange: 'transform, opacity' }}
               >
                 {l}
@@ -248,7 +260,7 @@ export function Hero() {
             {'MINH'.split('').map((l, i) => (
               <span
                 key={i}
-                className="hero-letter inline-block"
+                className="hero-letter hero-anim inline-block"
                 style={{ willChange: 'transform, opacity' }}
               >
                 {l}
@@ -260,7 +272,7 @@ export function Hero() {
         {/* Subtitle */}
         <p
           ref={subtitleRef}
-          className="mt-8 text-base md:text-lg max-w-md mx-auto leading-relaxed"
+          className="hero-anim mt-8 text-base md:text-lg max-w-md mx-auto leading-relaxed"
           style={{
             color: 'var(--text-muted)',
             fontFamily: 'var(--font-body)',
@@ -274,7 +286,7 @@ export function Hero() {
         {/* CTAs */}
         <div
           ref={ctaRef}
-          className="mt-10 flex items-center justify-center gap-4"
+          className="hero-anim mt-10 flex items-center justify-center gap-4"
         >
           <MagneticButton>
             <button
@@ -310,7 +322,7 @@ export function Hero() {
         {/* Trust strip — real clients & current agency */}
         <div
           ref={trustRef}
-          className="mt-14 flex flex-col items-center gap-3"
+          className="hero-anim mt-14 flex flex-col items-center gap-3"
         >
           <span
             className="font-mono text-[10px] tracking-[0.3em] uppercase"

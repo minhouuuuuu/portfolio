@@ -13,7 +13,9 @@ const LoaderContext = createContext<LoaderContextType>({
 })
 
 export function LoaderProvider({ children }: { children: ReactNode }) {
-  const [loaderDone, setLoaderDone] = useState(false)
+  // No intro loader anymore — content is shown immediately, so the entrance
+  // animations should be free to run from first mount.
+  const [loaderDone, setLoaderDone] = useState(true)
   return (
     <LoaderContext.Provider value={{ loaderDone, setLoaderDone }}>
       {children}
