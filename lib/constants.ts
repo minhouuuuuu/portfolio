@@ -5,7 +5,7 @@ export const PERSONAL_INFO = {
   location: 'Strasbourg, France',
   email: 'minhstrasbourg@gmail.com',
   github: 'https://github.com/minhouuuuuu',
-  linkedin: 'https://www.linkedin.com/in/minh-nguyen-a16293227/',
+  linkedin: 'https://www.linkedin.com/in/nguyen-minh-dev',
   instagram: 'https://www.instagram.com/nguyen__minh/',
   portfolio: 'https://nguyen-minh.dev',
   available: true,
@@ -30,7 +30,8 @@ export const PROJECTS = [
       fr: 'Site immersif pour une agence de voyage — transitions de scroll cinématiques et animations 3D qui transforment la navigation en voyage.',
     },
     link: 'https://askar-site.vercel.app/',
-    color: '#00e5a8',
+    // caseStudy: 'askar' — re-enable once lib/case-studies.ts has real content (see Phase 3).
+    color: '#c8ff00',
     image: '/photo/askar.png',
   },
   {
@@ -75,6 +76,7 @@ export const PROJECTS = [
       fr: "Site en production pour une brasserie française historique. Animations GSAP sur-mesure portant 150 ans d'héritage dans une interface moderne.",
     },
     link: 'https://www.brasserielicorne.com/',
+    // caseStudy: 'brasserie-licorne' — re-enable once lib/case-studies.ts has real content (see Phase 3).
     color: '#7b61ff',
     image: '/photo/licorne.png',
   },
@@ -89,6 +91,7 @@ export const PROJECTS = [
       fr: 'Site en production pour une entreprise de restauration. Mise en page éditoriale épurée et interactions de scroll fluides, livré pour un vrai client.',
     },
     link: 'https://salpa-restauration.fr/',
+    // caseStudy: 'salpa' — re-enable once lib/case-studies.ts has real content (see Phase 3).
     color: '#c8ff00',
     image: '/photo/salpa.png',
   },

@@ -54,15 +54,6 @@ export const metadata: Metadata = {
     title: 'Nguyen Minh — Creative Web Developer',
     description:
       'Crafting immersive web experiences at the intersection of code and creativity. React · Three.js · GSAP · Next.js',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Nguyen Minh — Creative Web Developer',
-        type: 'image/png',
-      },
-    ],
   },
 
   twitter: {
@@ -70,7 +61,6 @@ export const metadata: Metadata = {
     title: 'Nguyen Minh — Creative Web Developer',
     description:
       'Crafting immersive web experiences at the intersection of code and creativity.',
-    images: ['/og-image.png'],
     creator: '@nguyen__minh',
   },
 

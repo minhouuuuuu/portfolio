@@ -2,6 +2,8 @@ import { MetadataRoute } from 'next'
 
 const BASE_URL = 'https://nguyen-minh.dev'
 
+// Case study routes (/projects/[slug]) are intentionally excluded until their
+// content is real — see lib/case-studies.ts. Do not index lorem-ipsum pages.
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
