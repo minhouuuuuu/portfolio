@@ -7,6 +7,7 @@ import { useLoader } from '@/components/providers/LoaderContext'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { CV_FILES } from '@/lib/i18n/dictionaries'
 import { PERSONAL_INFO } from '@/lib/constants'
+import { track } from '@/lib/analytics'
 
 const Scene = dynamic(
   () => import('@/components/three/Scene').then((m) => m.Scene),
@@ -308,6 +309,7 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
               download
+              onClick={() => track({ name: 'cv_download', locale })}
               className="px-8 py-4 font-mono text-sm tracking-widest uppercase border-2 text-[var(--text-muted)] hover:text-[var(--text)] transition-[border-color,color,opacity] duration-300"
               style={{
                 fontFamily: 'var(--font-mono)',

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { TiltCard } from '@/components/ui/TiltCard'
 import { PERSONAL_INFO, PROJECTS } from '@/lib/constants'
 import { useLocale } from '@/components/providers/LocaleProvider'
+import { track } from '@/lib/analytics'
 
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -301,6 +302,7 @@ function ProjectCard({
     return (
       <Link
         href={`/projects/${caseStudySlug}`}
+        onClick={() => track({ name: 'case_study_open', slug: caseStudySlug })}
         className={`${sizeClasses} block cursor-pointer`}
         style={{ textDecoration: 'none', color: 'inherit' }}
       >

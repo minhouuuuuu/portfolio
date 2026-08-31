@@ -388,8 +388,8 @@ export const CASE_STUDIES: CaseStudy[] = [
     role: { en: 'Front-end & motion architecture', fr: 'Front-end & architecture motion' },
     stack: ['Web Components', 'Custom Elements', 'JavaScript'],
     color: '#00c2a8',
-    image: '/photo/art.png',
-    liveUrl: null,
+    image: '/photo/wattwiller.png',
+    liveUrl: 'https://www.wattwiller.com/',
     metaDescription:
       'A non-intrusive animation layer built as custom web components, used 90+ times across 32 templates — each element tearing down its own animations on disconnect.',
 

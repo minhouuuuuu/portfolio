@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 import { monument, neueMachina } from './fonts'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { LocaleProvider } from '@/components/providers/LocaleProvider'
@@ -108,6 +109,7 @@ export default function RootLayout({
             </LoaderProvider>
           </LocaleProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

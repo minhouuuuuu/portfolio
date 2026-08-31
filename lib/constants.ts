@@ -94,10 +94,10 @@ export const PROJECTS = [
       en: 'A non-intrusive animation layer built as custom web components — used 90+ times across 32 templates, each tearing down its own animations on disconnect.',
       fr: "Une couche d'animation non intrusive en composants web personnalisés — utilisée 90+ fois dans 32 gabarits, chacun démontant ses propres animations à la déconnexion.",
     },
-    link: null,
+    link: 'https://www.wattwiller.com/',
     caseStudy: 'wattwiller',
     color: '#00c2a8',
-    image: '/photo/art.png',
+    image: '/photo/wattwiller.png',
   },
   {
     id: 5,

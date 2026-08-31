@@ -5,10 +5,12 @@ import { Projects } from '@/components/sections/Projects'
 import { LabSection } from '@/components/lab/LabSection'
 import { MarqueeText } from '@/components/ui/MarqueeText'
 import { Contact } from '@/components/sections/Contact'
+import { ScrollDepthTracker } from '@/components/analytics/ScrollDepthTracker'
 
 export default function Home() {
   return (
     <main>
+      <ScrollDepthTracker />
       <Navbar />
       <Hero />
       <MarqueeText

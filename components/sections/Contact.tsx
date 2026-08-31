@@ -6,6 +6,7 @@ import { MagneticButton } from '@/components/ui/MagneticButton'
 import { PERSONAL_INFO } from '@/lib/constants'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { ContactMap } from '@/components/sections/ContactMap'
+import { track } from '@/lib/analytics'
 
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -147,6 +148,7 @@ export function Contact() {
         <div className="mt-12 mb-10">
           <a
             href={`mailto:${PERSONAL_INFO.email}`}
+            onClick={() => track({ name: 'contact_click', method: 'email' })}
             className="font-mono text-base md:text-lg tracking-wider"
             style={{
               fontFamily: 'var(--font-mono)',

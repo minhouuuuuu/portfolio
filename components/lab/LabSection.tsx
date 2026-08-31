@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { useLabCanvas } from './useLabCanvas'
 import { useLocale } from '@/components/providers/LocaleProvider'
+import { track } from '@/lib/analytics'
 
 type GsapInstance = typeof import('gsap').gsap
 
@@ -227,6 +228,7 @@ export function LabSection() {
       if (visible) {
         if (!initedRef.current) {
           initedRef.current = true
+          track({ name: 'lab_enter' })
           initExperiment('fluid')
         } else {
           instanceRef.current?.resume()
@@ -566,6 +568,27 @@ export function LabSection() {
           >
             {activeExp.stack}
           </span>
+        </div>
+      </div>
+
+      {/* ── Engineering note — the LazyMotion revert, made visible ─────────── */}
+      <div className="max-w-6xl mx-auto px-6 pt-10">
+        <div
+          className="px-5 py-4 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 border-l-2"
+          style={{ borderColor: 'var(--accent)', background: 'var(--surface)' }}
+        >
+          <span
+            className="font-mono text-[10px] tracking-[0.25em] uppercase shrink-0"
+            style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}
+          >
+            {t.lab.engineeringNoteLabel}
+          </span>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            {t.lab.engineeringNoteBody}
+          </p>
         </div>
       </div>
 

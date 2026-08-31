@@ -79,6 +79,8 @@ export interface Dictionary {
     subtitle: string
     wannaSeeMore: string
     performanceTest: string
+    engineeringNoteLabel: string
+    engineeringNoteBody: string
   }
   contact: {
     label: string
@@ -171,11 +173,14 @@ const en: Dictionary = {
     keepScrolling: 'KEEP SCROLLING',
   },
   lab: {
-    label: 'INTERACTIVE LAB',
-    title: 'In motions',
-    subtitle: 'Touch it. Break it. Make it yours.',
+    label: 'ENGINEERING LAB',
+    title: 'Built under constraint',
+    subtitle: 'Hand-written rendering engines, tuned for the GPU budget they run on.',
     wannaSeeMore: 'WANNA SEE MORE?',
     performanceTest: 'PERFORMANCE TEST',
+    engineeringNoteLabel: 'ENGINEERING NOTE',
+    engineeringNoteBody:
+      'LazyMotion — the textbook Framer Motion optimization — was implemented, measured, and reverted. Home first-load JS went 328 KB → 336 KB gzip: an 8 KB regression, not a win. Full trade-off write-up in the repo.',
   },
   contact: {
     label: "LET'S CREATE",
@@ -183,8 +188,8 @@ const en: Dictionary = {
     line2: 'TOGETHER',
     footer: '© 2026 Nguyen Minh — Crafted in Strasbourg',
     mapLabel: 'WHERE I AM',
-    basedIn: 'Based in Strasbourg, France',
-    openTo: 'Open to relocate & work anywhere across Europe',
+    basedIn: 'Strasbourg, France — relocating to Hanoi, Vietnam',
+    openTo: 'Open to remote work worldwide',
   },
 }
 
@@ -268,11 +273,14 @@ const fr: Dictionary = {
     keepScrolling: 'CONTINUE DE SCROLLER',
   },
   lab: {
-    label: 'LAB INTERACTIF',
-    title: 'En mouvement',
-    subtitle: 'Touche. Casse. Approprie-toi-le.',
+    label: 'LAB D’INGÉNIERIE',
+    title: 'Construit sous contrainte',
+    subtitle: 'Moteurs de rendu écrits à la main, ajustés au budget GPU sur lequel ils tournent.',
     wannaSeeMore: 'EN VOIR PLUS ?',
     performanceTest: 'TEST DE PERFORMANCE',
+    engineeringNoteLabel: 'NOTE D’INGÉNIERIE',
+    engineeringNoteBody:
+      'LazyMotion — l’optimisation canonique de Framer Motion — a été implémentée, mesurée, puis retirée. Le JS de premier chargement de la home est passé de 328 Ko à 336 Ko gzip : une régression de 8 Ko, pas un gain. Le raisonnement complet est consigné dans le dépôt.',
   },
   contact: {
     label: 'CRÉONS ENSEMBLE',
@@ -280,8 +288,8 @@ const fr: Dictionary = {
     line2: 'ENSEMBLE',
     footer: '© 2026 Nguyen Minh — Façonné à Strasbourg',
     mapLabel: 'OÙ JE SUIS',
-    basedIn: 'Basé à Strasbourg, France',
-    openTo: 'Ouvert à la mobilité partout en Europe',
+    basedIn: 'Strasbourg, France — en cours de relocalisation à Hanoï, Vietnam',
+    openTo: 'Ouvert au télétravail dans le monde entier',
   },
 }
 
