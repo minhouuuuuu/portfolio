@@ -434,8 +434,8 @@ export const CASE_STUDIES: CaseStudy[] = [
         },
       },
       {
-        value: '200/503',
-        label: { en: 'HEALTH CHECK CONTRACT', fr: 'CONTRAT DE SONDE DE SANTÉ' },
+        value: '3/3',
+        label: { en: 'DEPENDENCIES UNDER 200/503 CONTRACT', fr: 'DÉPENDANCES SOUS CONTRAT 200/503' },
       },
     ],
     wouldMeasureBody: {
