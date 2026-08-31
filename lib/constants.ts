@@ -36,7 +36,7 @@ export const PROJECTS = [
   },
   {
     id: 2,
-    title: 'DROPBOX CLONE',
+    title: 'FILEDROP',
     year: '2025',
     tags: ['Next.js', 'TypeScript', 'Firebase', 'Clerk', 'Zustand'],
     role: { en: 'Personal · Full-stack', fr: 'Personnel · Full-stack' },
