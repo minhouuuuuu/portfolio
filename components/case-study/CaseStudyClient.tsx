@@ -689,54 +689,66 @@ export function CaseStudyClient({
         </div>
       </section>
 
-      {/* ── Gallery — 1 real capture + placeholders to swap later ─────────── */}
+      {/* ── Gallery — main image + up to 2 extra shots; empty slots fall
+             back to a placeholder tile ────────────────────────────────────── */}
       <section className="section">
         <div className="max-w-6xl mx-auto px-6">
           <div data-reveal="">
             <SectionLabel text={t.caseStudy.gallery} />
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            <div
-              data-reveal="clip"
-              className="relative overflow-hidden border aspect-16/10"
-              style={{
-                borderColor: 'var(--border)',
-                background: 'var(--surface)',
-              }}
-            >
-              <div className="cs-clip-img absolute inset-0 will-change-transform">
-                <Image
-                  src={caseStudy.image}
-                  alt={`${caseStudy.title} — 01`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 560px"
-                  className="object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-            {[2, 3].map((n, i) => (
-              <div
-                key={n}
-                data-reveal="clip"
-                data-delay={String(0.12 * (i + 1))}
-                className="relative overflow-hidden border aspect-16/10 flex items-center justify-center"
-                style={{
-                  borderColor: 'var(--border)',
-                  background: `linear-gradient(135deg, ${caseStudy.color}22 0%, ${caseStudy.color}08 50%, var(--surface) 100%)`,
-                }}
-              >
-                <span
-                  className="font-mono text-[10px] tracking-[0.3em] uppercase"
+            {[caseStudy.image, ...(caseStudy.gallery ?? [])]
+              .slice(0, 3)
+              .map((src, i) => (
+                <div
+                  key={src}
+                  data-reveal="clip"
+                  data-delay={i > 0 ? String(0.12 * i) : undefined}
+                  className="relative overflow-hidden border aspect-16/10"
                   style={{
-                    color: 'var(--text-muted)',
-                    fontFamily: 'var(--font-mono)',
+                    borderColor: 'var(--border)',
+                    background: 'var(--surface)',
                   }}
                 >
-                  {String(n).padStart(2, '0')} — {t.caseStudy.placeholder}
-                </span>
-              </div>
-            ))}
+                  <div className="cs-clip-img absolute inset-0 will-change-transform">
+                    <Image
+                      src={src}
+                      alt={`${caseStudy.title} — ${String(i + 1).padStart(2, '0')}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 560px"
+                      className="object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              ))}
+            {Array.from({
+              length: Math.max(0, 3 - 1 - (caseStudy.gallery?.length ?? 0)),
+            }).map((_, i) => {
+              const n = 2 + (caseStudy.gallery?.length ?? 0) + i
+              return (
+                <div
+                  key={`placeholder-${n}`}
+                  data-reveal="clip"
+                  data-delay={String(0.12 * (i + 1))}
+                  className="relative overflow-hidden border aspect-16/10 flex items-center justify-center"
+                  style={{
+                    borderColor: 'var(--border)',
+                    background: `linear-gradient(135deg, ${caseStudy.color}22 0%, ${caseStudy.color}08 50%, var(--surface) 100%)`,
+                  }}
+                >
+                  <span
+                    className="font-mono text-[10px] tracking-[0.3em] uppercase"
+                    style={{
+                      color: 'var(--text-muted)',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    {String(n).padStart(2, '0')} — {t.caseStudy.placeholder}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>

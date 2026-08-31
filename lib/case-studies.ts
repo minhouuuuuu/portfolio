@@ -30,6 +30,10 @@ export interface CaseStudy {
   stack: string[]
   color: string
   image: string
+  /** Extra gallery shots beyond `image` (which always fills slot 01). Up to
+   *  2 — any missing slot falls back to a placeholder tile. Put files in
+   *  public/photo/ and reference them here as '/photo/filename.png'. */
+  gallery?: string[]
   liveUrl: string | null
   metaDescription: string
 
