@@ -13,26 +13,25 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
   title: {
-    default: 'Nguyen Minh — Creative Web Developer',
+    default: 'Nguyen Minh — Product Engineer',
     template: '%s | Nguyen Minh',
   },
 
   description:
-    'Creative Web Developer specializing in React, Next.js, Three.js, and GSAP. Building immersive digital experiences at IZHAK INTERACT AGENCY in Strasbourg, France.',
+    'Product Engineer / Fullstack Developer specializing in React, Next.js, and TypeScript. Shipping production systems — from client scoping to data pipelines to on-call monitoring.',
 
   keywords: [
-    'Creative Developer',
-    'Creative Web Developer',
+    'Product Engineer',
+    'Fullstack Developer',
     'Frontend Developer',
     'Web Developer',
     'React Developer',
     'Next.js Developer',
+    'TypeScript',
+    'System Design',
     'Three.js',
     'GSAP',
-    'Framer Motion',
     'WebGL',
-    'Animation',
-    'Interactive Web',
     'Strasbourg',
     'France',
     'Nguyen Minh',
@@ -50,17 +49,17 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: BASE_URL,
-    siteName: 'Nguyen Minh — Creative Web Developer',
-    title: 'Nguyen Minh — Creative Web Developer',
+    siteName: 'Nguyen Minh — Product Engineer',
+    title: 'Nguyen Minh — Product Engineer',
     description:
-      'Crafting immersive web experiences at the intersection of code and creativity. React · Three.js · GSAP · Next.js',
+      'Product Engineer / Fullstack Developer. React · Next.js · TypeScript — production systems, not just prototypes.',
   },
 
   twitter: {
     card: 'summary_large_image',
-    title: 'Nguyen Minh — Creative Web Developer',
+    title: 'Nguyen Minh — Product Engineer',
     description:
-      'Crafting immersive web experiences at the intersection of code and creativity.',
+      'Product Engineer / Fullstack Developer. Production systems, not just prototypes.',
     creator: '@nguyen__minh',
   },
 

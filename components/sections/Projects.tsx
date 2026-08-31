@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { TiltCard } from '@/components/ui/TiltCard'
 import { PERSONAL_INFO, PROJECTS } from '@/lib/constants'
 import { useLocale } from '@/components/providers/LocaleProvider'
@@ -135,6 +136,7 @@ export function Projects() {
               locale={locale}
               visitLabel={t.projects.visit}
               soonLabel={t.projects.soon}
+              caseStudyLabel={t.projects.caseStudy}
             />
           ))}
         </div>
@@ -148,13 +150,21 @@ function ProjectCard({
   locale,
   visitLabel,
   soonLabel,
+  caseStudyLabel,
 }: {
   project: (typeof PROJECTS)[number]
   locale: 'en' | 'fr'
   visitLabel: string
   soonLabel: string
+  caseStudyLabel: string
 }) {
   const isComingSoon = 'comingSoon' in project && project.comingSoon === true
+  // Flagship projects open their internal case study page; the live site
+  // stays reachable from there. Others keep linking straight to the live URL.
+  const caseStudySlug =
+    'caseStudy' in project && typeof project.caseStudy === 'string'
+      ? project.caseStudy
+      : null
   const projectLink = isComingSoon
     ? null
     : (project.link ?? PERSONAL_INFO.portfolio)
@@ -261,7 +271,7 @@ function ProjectCard({
           </div>
 
           {/* CTA */}
-          {isComingSoon || !projectLink ? (
+          {isComingSoon || (!projectLink && !caseStudySlug) ? (
             <span
               className="inline-flex w-fit items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 opacity-50 cursor-default"
               style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
@@ -273,7 +283,7 @@ function ProjectCard({
               className="inline-flex w-fit items-center gap-2 font-mono text-xs tracking-widest uppercase border border-current py-2.5 px-5 transition-colors duration-300"
               style={{ color: project.color, fontFamily: 'var(--font-mono)' }}
             >
-              {visitLabel} ↗
+              {caseStudySlug ? <>{caseStudyLabel} →</> : <>{visitLabel} ↗</>}
             </span>
           )}
         </div>
@@ -286,6 +296,18 @@ function ProjectCard({
   // shrinks to absorb the constraint so content/CTA stay visible without overflow.
   const sizeClasses =
     'project-card shrink-0 w-[min(82vw,360px)] md:w-[min(48vw,560px)] h-auto max-h-[min(78vh,620px)]'
+
+  if (caseStudySlug) {
+    return (
+      <Link
+        href={`/projects/${caseStudySlug}`}
+        className={`${sizeClasses} block cursor-pointer`}
+        style={{ textDecoration: 'none', color: 'inherit' }}
+      >
+        {cardInner}
+      </Link>
+    )
+  }
 
   if (projectLink) {
     return (

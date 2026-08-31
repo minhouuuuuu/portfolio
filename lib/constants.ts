@@ -30,7 +30,7 @@ export const PROJECTS = [
       fr: 'Site immersif pour une agence de voyage — transitions de scroll cinématiques et animations 3D qui transforment la navigation en voyage.',
     },
     link: 'https://askar-site.vercel.app/',
-    // caseStudy: 'askar' — re-enable once lib/case-studies.ts has real content (see Phase 3).
+    caseStudy: 'askar',
     color: '#c8ff00',
     image: '/photo/askar.png',
   },
@@ -45,6 +45,7 @@ export const PROJECTS = [
       fr: 'Une application de stockage de fichiers façon Dropbox — authentification, uploads et gestion de dossiers reconstruits de zéro.',
     },
     link: 'https://nguyen-minh-dropbox-clone.vercel.app/',
+    caseStudy: 'filedrop',
     color: '#0061ff',
     image: '/photo/dropbox.png',
   },
@@ -76,9 +77,27 @@ export const PROJECTS = [
       fr: "Site en production pour une brasserie française historique. Animations GSAP sur-mesure portant 150 ans d'héritage dans une interface moderne.",
     },
     link: 'https://www.brasserielicorne.com/',
-    // caseStudy: 'brasserie-licorne' — re-enable once lib/case-studies.ts has real content (see Phase 3).
+    caseStudy: 'brasserie-licorne',
     color: '#7b61ff',
     image: '/photo/licorne.png',
+  },
+  {
+    id: 9,
+    title: 'WATTWILLER',
+    year: '2024',
+    tags: ['Web Components', 'Custom Elements', 'Agency'],
+    role: {
+      en: 'Agency · Front-end & motion architecture',
+      fr: 'Agence · Front-end & architecture motion',
+    },
+    description: {
+      en: 'A non-intrusive animation layer built as custom web components — used 90+ times across 32 templates, each tearing down its own animations on disconnect.',
+      fr: "Une couche d'animation non intrusive en composants web personnalisés — utilisée 90+ fois dans 32 gabarits, chacun démontant ses propres animations à la déconnexion.",
+    },
+    link: null,
+    caseStudy: 'wattwiller',
+    color: '#00c2a8',
+    image: '/photo/art.png',
   },
   {
     id: 5,
@@ -91,7 +110,6 @@ export const PROJECTS = [
       fr: 'Site en production pour une entreprise de restauration. Mise en page éditoriale épurée et interactions de scroll fluides, livré pour un vrai client.',
     },
     link: 'https://salpa-restauration.fr/',
-    // caseStudy: 'salpa' — re-enable once lib/case-studies.ts has real content (see Phase 3).
     color: '#c8ff00',
     image: '/photo/salpa.png',
   },
@@ -187,9 +205,8 @@ export const STATS = [
 ]
 
 export const NAV_LINKS = [
+  { label: 'Work', href: '#projects' },
   { label: 'About', href: '#about' },
-  { label: 'Services', href: '#services' },
-  { label: 'Projects', href: '#projects' },
   { label: 'Lab', href: '#lab' },
   { label: 'Contact', href: '#contact' },
 ]

@@ -18,7 +18,6 @@ export function Navbar() {
   // Localized labels keyed off the stable href so active-state logic is untouched.
   const navLabels: Record<string, string> = {
     "#about": t.nav.about,
-    "#services": t.nav.services,
     "#projects": t.nav.projects,
     "#lab": t.nav.lab,
     "#contact": t.nav.contact,

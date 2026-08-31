@@ -15,7 +15,6 @@ export const CV_FILES: Record<Locale, string> = {
 export interface Dictionary {
   nav: {
     about: string
-    services: string
     projects: string
     lab: string
     contact: string
@@ -52,6 +51,27 @@ export interface Dictionary {
     title: string
     visit: string
     soon: string
+    caseStudy: string
+  }
+  caseStudy: {
+    label: string
+    back: string
+    visitSite: string
+    client: string
+    role: string
+    year: string
+    stack: string
+    problem: string
+    forWho: string
+    decisions: string
+    gallery: string
+    notDone: string
+    wouldMeasure: string
+    wouldRedo: string
+    placeholder: string
+    nextProject: string
+    backHome: string
+    keepScrolling: string
   }
   lab: {
     label: string
@@ -74,14 +94,13 @@ export interface Dictionary {
 const en: Dictionary = {
   nav: {
     about: 'About',
-    services: 'Services',
-    projects: 'Projects',
+    projects: 'Work',
     lab: 'Lab',
     contact: 'Contact',
     hireMe: 'HIRE ME',
   },
   hero: {
-    label: 'Creative Developer',
+    label: 'Product Engineer',
     available: 'Open to work',
     availableShort: 'Available',
     subtitle1: 'Crafting immersive web experiences',
@@ -94,7 +113,7 @@ const en: Dictionary = {
   },
   about: {
     label: 'ABOUT ME',
-    headline: 'A developer who thinks like a designer.',
+    headline: 'Design instincts, shipped like an engineer.',
     body1Pre:
       'Based in Strasbourg, France. Currently crafting production-grade experiences at ',
     body1Post: '.',
@@ -129,6 +148,27 @@ const en: Dictionary = {
     title: 'PROJECTS',
     visit: 'VISIT',
     soon: 'SOON',
+    caseStudy: 'CASE STUDY',
+  },
+  caseStudy: {
+    label: 'CASE STUDY',
+    back: 'PROJECTS',
+    visitSite: 'VISIT LIVE SITE',
+    client: 'CLIENT',
+    role: 'ROLE',
+    year: 'YEAR',
+    stack: 'STACK',
+    problem: 'The problem',
+    forWho: 'Who this was for',
+    decisions: 'Decisions made — and why',
+    gallery: 'GALLERY',
+    notDone: 'What I chose not to do',
+    wouldMeasure: "What I'd measure",
+    wouldRedo: "What I'd redo differently",
+    placeholder: 'PLACEHOLDER — REAL CONTENT COMING',
+    nextProject: 'NEXT PROJECT',
+    backHome: 'BACK TO HOME',
+    keepScrolling: 'KEEP SCROLLING',
   },
   lab: {
     label: 'INTERACTIVE LAB',
@@ -151,14 +191,13 @@ const en: Dictionary = {
 const fr: Dictionary = {
   nav: {
     about: 'À propos',
-    services: 'Services',
-    projects: 'Projets',
+    projects: 'Travail',
     lab: 'Lab',
     contact: 'Contact',
     hireMe: 'ME RECRUTER',
   },
   hero: {
-    label: 'Développeur Créatif',
+    label: 'Product Engineer',
     available: 'Disponible',
     availableShort: 'Dispo',
     subtitle1: 'Je façonne des expériences web immersives',
@@ -171,7 +210,7 @@ const fr: Dictionary = {
   },
   about: {
     label: 'À PROPOS',
-    headline: 'Un développeur qui pense comme un designer.',
+    headline: 'Des réflexes de designer, livrés comme un ingénieur.',
     body1Pre:
       'Basé à Strasbourg, France. Je conçois des expériences en production chez ',
     body1Post: '.',
@@ -206,6 +245,27 @@ const fr: Dictionary = {
     title: 'PROJETS',
     visit: 'VISITER',
     soon: 'BIENTÔT',
+    caseStudy: 'ÉTUDE DE CAS',
+  },
+  caseStudy: {
+    label: 'ÉTUDE DE CAS',
+    back: 'PROJETS',
+    visitSite: 'VOIR LE SITE LIVE',
+    client: 'CLIENT',
+    role: 'RÔLE',
+    year: 'ANNÉE',
+    stack: 'STACK',
+    problem: 'Le problème',
+    forWho: 'Pour qui',
+    decisions: 'Décisions prises — et pourquoi',
+    gallery: 'GALERIE',
+    notDone: "Ce que j'ai choisi de ne pas faire",
+    wouldMeasure: 'Ce que je mesurerais',
+    wouldRedo: 'Ce que je referais autrement',
+    placeholder: 'PLACEHOLDER — CONTENU À VENIR',
+    nextProject: 'PROJET SUIVANT',
+    backHome: 'RETOUR À L’ACCUEIL',
+    keepScrolling: 'CONTINUE DE SCROLLER',
   },
   lab: {
     label: 'LAB INTERACTIF',

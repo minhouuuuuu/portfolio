@@ -40,7 +40,7 @@ export default async function Image() {
             maxWidth: 980,
           }}
         >
-          Fullstack Developer
+          Product Engineer
         </div>
         <div
           style={{

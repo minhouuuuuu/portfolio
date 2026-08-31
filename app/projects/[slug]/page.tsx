@@ -7,10 +7,7 @@ import {
   getNextCaseStudy,
 } from '@/lib/case-studies'
 
-// Case studies are lorem-ipsum placeholders (see lib/case-studies.ts). The
-// route is kept unpublished — not statically generated, not indexed, 404s
-// on request — until Phase 3 replaces the body copy with real content.
-const PUBLISHED = false
+const PUBLISHED = true
 
 export function generateStaticParams() {
   return PUBLISHED ? CASE_STUDIES.map(({ slug }) => ({ slug })) : []
