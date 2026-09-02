@@ -28,6 +28,7 @@
  * Run: node scripts/generate-dotted-map.mjs
  */
 import { createMap } from 'svg-dotted-map'
+import { MARKERS } from '../lib/map/markers.ts'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -109,30 +110,11 @@ function buildDotPath(pts, radius) {
 const dotPath = buildDotPath(points, DOT_RADIUS)
 
 // ── Markers ────────────────────────────────────────────────────────────────
-// Kept as discrete elements (not folded into the path) because they are a
-// different colour from the dot field and two of them pulse. Their positions
-// are still resolved here so the browser never projects lat/lng at runtime.
-const HOMES = [
-  { lat: 48.5734, lng: 7.7521, size: 0.9, pulse: true }, // Strasbourg
-  { lat: 21.0278, lng: 105.8342, size: 0.9, pulse: true }, // Hanoi
-]
-const WORLD_HUBS = [
-  { lat: 51.5074, lng: -0.1278 }, // London
-  { lat: 52.52, lng: 13.405 }, // Berlin
-  { lat: 40.4168, lng: -3.7038 }, // Madrid
-  { lat: 52.3676, lng: 4.9041 }, // Amsterdam
-  { lat: 59.3293, lng: 18.0686 }, // Stockholm
-  { lat: 1.3521, lng: 103.8198 }, // Singapore
-  { lat: 13.7563, lng: 100.5018 }, // Bangkok
-  { lat: 35.6762, lng: 139.6503 }, // Tokyo
-  { lat: 22.3193, lng: 114.1694 }, // Hong Kong
-  { lat: -33.8688, lng: 151.2093 }, // Sydney
-  { lat: 40.7128, lng: -74.006 }, // New York
-  { lat: 37.7749, lng: -122.4194 }, // San Francisco
-  { lat: -23.5505, lng: -46.6333 }, // São Paulo
-]
-
-const MARKERS = [...HOMES, ...WORLD_HUBS.map((m) => ({ ...m, size: 0.45 }))]
+// Imported from lib/map/markers.ts — the single source of truth, shared with
+// the app. Kept as discrete elements rather than folded into the dot path
+// because they use a different colour and each carries two pulsing rings.
+// Their positions are resolved here so the browser never projects lat/lng at
+// runtime.
 
 const placed = addMarkers(MARKERS).map((m) => ({
   x: r(m.x + offsetFor(m.y)),
