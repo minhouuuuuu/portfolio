@@ -178,9 +178,39 @@ to win there. Each change below was measured on desktop and mobile, median of
 
 | Change | Desktop TBT | Mobile TBT | Verdict |
 |---|---|---|---|
-| gsap dynamic in CountUp/MarqueeText, delete dead useGSAP | no measurable change | no measurable change | **kept, on non-perf grounds** |
 | CustomCursor: load framer-motion only on fine pointers | 16 → 10ms, perf 98 → 97 | 423 → 493ms, perf 64 → 62 | **reverted** |
 | useScrollProgress / useActiveSection: cache layout reads, rAF-throttle | 11ms (flat) | 423 → 462ms | **reverted** |
+
+**Phase 2 produced no performance improvement at all.** Both changes it tried
+were reverted. One further change was made during this phase and kept, but it
+is a code cleanup with no measurable effect — see below.
+
+### Not a performance change: the gsap import cleanup
+
+`hooks/useGSAP.ts` imported gsap statically and was referenced by nothing.
+`CountUp.tsx` ran `gsap.registerPlugin(ScrollTrigger)` at module scope, so
+importing the component executed a side effect before anything rendered;
+`MarqueeText.tsx` imported gsap statically for the same reason. All three now
+use `await import('gsap')` inside the effect that needs it, as every other call
+site in the app already did, and the dead hook is deleted.
+
+This was originally attempted as an optimisation. Measured properly with an
+interleaved A/B run (5 cycles, both builds alternating on the same port so they
+share machine load):
+
+| | perf min/med/max | TBT min/med/max |
+|---|---|---|
+| without the change | 59 / **64** / 67 | 386 / **418** / 578ms |
+| with the change | 63 / **65** / 68 | 368 / **412** / 519ms |
+
+Median TBT delta: **-6ms, against an intra-variant amplitude of 192ms** —
+indistinguishable from noise in both directions.
+
+**It is therefore recorded here as a cleanup, not a performance improvement.**
+It was kept because it deletes dead code and removes a module-scope side
+effect, not because it made the site faster. It did not. (Its git commit
+message still carries a `perf:` prefix; that commit was already published and
+was not rewritten just to change a prefix. This document is the reference.)
 
 ### Reverted: dynamic framer-motion in CustomCursor
 
