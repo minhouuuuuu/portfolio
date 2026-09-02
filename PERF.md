@@ -10,16 +10,36 @@ component rendering a world map that nobody could see yet.
 | | Desktop | | Mobile | |
 |---|---|---|---|---|
 | | before | after | before | after |
-| Performance | 64 | **97** | 39 | **65** |
-| Total Blocking Time | 2,386ms | **9ms** | 9,755ms | **448ms** |
-| Speed Index | 1.9s | **0.92s** | — | — |
+| Performance | 64 | **98** | 39 | **65** |
+| Total Blocking Time | 2,386ms | **8ms** | 9,755ms | **412ms** |
+| Speed Index | 1.9s | **0.93s** | — | — |
 | Time to Interactive | 4.2s | **1.19s** | — | — |
-| CLS | 0.001 | 0.001 | 0.009 | 0.009 |
+| CLS | 0.001 | 0.001 | 0.009 | 0.009-0.011 |
 | Accessibility / SEO | 100 | 100 | 100 | 100 |
 
-Median of 3 runs, production build (`next build && next start`), same machine.
-"Before" figures are the local reproduction of the reported production score
-of 65; they track it closely enough to iterate against without deploying.
+Desktop: median of 5 runs. Mobile: median of an interleaved A/B run (see
+**Measurement method** below). Production build (`next build && next start`),
+same machine. "Before" figures are the local reproduction of the reported
+production score of 65; they track it closely enough to iterate against
+without deploying.
+
+### Measurement method — and a warning
+
+Mobile numbers on this machine are **noisy enough to invent results that are
+not there**. Measured over 5 runs of an unchanged build, mobile TBT ranged
+386-578ms: an amplitude of ~190ms, and under background load (Spotify, Adobe
+Creative Cloud; load average ~4) a single sample drifted as far as 3,800ms.
+
+Any mobile delta smaller than ~200ms is noise. Three-run medians taken minutes
+apart are **not** a valid comparison, because machine load drifts between them.
+Two conclusions in an earlier draft of this document were wrong for exactly
+that reason and have been corrected below.
+
+The reliable protocol, used for every mobile A/B here, is
+`scratchpad/ab.sh`-style **interleaving**: build A and build B are kept side by
+side and measured alternately on the same port, one run each per cycle, so both
+variants absorb the same drift. Report min/median/max, and refuse to conclude
+on any delta smaller than the observed intra-variant amplitude.
 
 ## Diagnosis — and why the obvious suspect was wrong
 
@@ -92,7 +112,7 @@ Both were built and measured:
 |---|---|---|
 | Desktop TBT | 18ms | 9ms |
 | Mobile TBT | 532ms | 444ms |
-| HTML served | 178KB | 69KB |
+| HTML served (raw / gzipped) | 175KB / 20.1KB | 67KB / 11.3KB + a separate .svg |
 | Follows light/dark theme | **yes** | **no** |
 
 `<img>` won on raw numbers, but by ~88ms out of ~9,300ms recovered — under 2%,
@@ -158,7 +178,7 @@ to win there. Each change below was measured on desktop and mobile, median of
 
 | Change | Desktop TBT | Mobile TBT | Verdict |
 |---|---|---|---|
-| gsap dynamic in CountUp/MarqueeText, delete dead useGSAP | 9 → 16ms | 448 → 423ms | **kept** |
+| gsap dynamic in CountUp/MarqueeText, delete dead useGSAP | no measurable change | no measurable change | **kept, on non-perf grounds** |
 | CustomCursor: load framer-motion only on fine pointers | 16 → 10ms, perf 98 → 97 | 423 → 493ms, perf 64 → 62 | **reverted** |
 | useScrollProgress / useActiveSection: cache layout reads, rAF-throttle | 11ms (flat) | 423 → 462ms | **reverted** |
 
@@ -217,26 +237,93 @@ recover here.
   14KiB in the original report has already gone. No browserslist key is set,
   and adding one measured nothing to fix.
 
-## Where the remaining points are
+## Mobile LCP: measured, and it is not what it looked like
 
-Desktop is effectively done: the only imperfect audits left are LCP (1.2s,
-score 0.90) and Speed Index (1.0s, score 0.98), both explicitly out of scope.
+The plan was to keep the WebGL hero on every device but defer it behind a
+static poster, on the theory that mobile LCP (6.0s, score 0.13) was three.js
+evaluating on a throttled CPU.
 
-**Mobile is a different problem from the one this work fixed.** After Phase 1
-the mobile breakdown is:
+**That theory was wrong, and the fix would have gained nothing.** Two
+measurements settle it.
 
-| Audit | Weight | Score |
-|---|---|---|
-| largest-contentful-paint (6.0s) | 25 | **0.13** |
-| total-blocking-time (410ms) | 30 | 0.66 |
-| speed-index (4.8s) | 10 | 0.67 |
+**1. What the LCP element actually is.** Rather than assume, the real
+`PerformanceObserver` entry was read from the page under mobile emulation (412
+x823, 4x CPU, throttled network). The LCP element is neither the headline nor
+the canvas:
 
-LCP now dominates, not TBT. And it is not a network problem: every request
-including all four fonts completes by ~1.2s, while LCP lands at 6.0s. The
-~4.8s gap is CPU — the three.js/react-three-fiber hero scene evaluating on a
-4x-throttled mobile CPU. `04.8wcmbi0sj7.js` is 98KB of three.js, 89% of it
-unused on this route.
+```
+t= 376ms  <A>    "NM"                                    (nav logo)
+t=1576ms  <SPAN> "PRODUCT ENGINEER"                      (hero label)
+t=2228ms  <P>    "Je cadre les problemes, ..."           <- LCP
+```
 
-The fix would be to stop mounting the WebGL hero scene on mobile, or to defer
-it until after LCP. Both touch the hero and the LCP element, so both need
-sign-off before anything is changed.
+It is the hero **subtitle paragraph**, and it carries the class `hero-anim`.
+
+**2. Why it lands where it lands.** `hero-anim` elements are hidden by CSS
+(`#hero:not([data-hero-ready]) .hero-anim`) and revealed by the GSAP entrance
+timeline in `Hero.tsx`. The subtitle's fade is scheduled at **t=1.2s into that
+timeline**, which itself only starts once gsap has been dynamically imported.
+The LCP is therefore the deliberate choreography of the hero entrance, not
+script evaluation.
+
+The WebGL scene is revealed at t=1.8s in the same timeline — i.e. **after** the
+LCP element. It is already deferred by design.
+
+**3. The control.** Removing `<Scene />` from the hero entirely and
+re-measuring:
+
+| | LCP |
+|---|---|
+| with the WebGL scene | 2,228ms |
+| with the scene removed | 2,304ms |
+
+Deleting three.js from the hero does not improve LCP at all. A poster-plus-swap
+would have added a component, a state transition and a swap risk to CLS in
+exchange for nothing.
+
+(The 6.0s Lighthouse LCP and the 2.2s observed here differ because Lighthouse
+applies its own simulated throttling on top; the *ordering* — subtitle last,
+canvas after it — is what matters, and is consistent in both.)
+
+**What would actually move mobile LCP** is shortening the hero entrance
+choreography: the subtitle currently waits 1.2s of timeline before it starts
+fading in. That is a deliberate design decision about how the site feels, not a
+bug, so it is not something to "optimise" unilaterally. Reducing that delay, or
+revealing the subtitle earlier in the sequence, is the lever — and it is a
+design call.
+
+## The three.js chunk (`04.8wcmbi0sj7.js`, 97KB, 89% unused)
+
+Checked, as a suspected over-broad import. The scene uses `Canvas` and
+`useFrame` from `@react-three/fiber`, two helpers (`AdaptiveDpr`,
+`AdaptiveEvents`) from `@react-three/drei`, and a handful of three primitives
+(`points`, `mesh`, two lights, four geometries, two materials).
+
+`@react-three/drei` is 2.9MB installed and re-exports its whole surface from a
+barrel, and unlike `three` it is **not** listed in `optimizePackageImports` in
+`next.config.ts` — so deep-importing the two helpers looked promising. It was
+tried:
+
+| | total chunk bytes |
+|---|---|
+| barrel import | 2,840KB |
+| deep imports | 2,841KB |
+
+No gain — Turbopack already tree-shakes the barrel. **Reverted**, since it makes
+imports uglier for nothing.
+
+The 89%-unused figure is structural: three.js is a monolithic engine and a
+simple scene exercises a fraction of it. The chunk is already behind
+`next/dynamic` and loads after the hero text. Shrinking it further means
+changing engine, not changing imports.
+
+## Still open
+
+- **WOFF2 conversion.** Needs `fonttools` or the `woff2` npm package — a new
+  dependency. And the prize is smaller than the raw numbers suggest: the fonts
+  are 613KB of `.otf`, but they compress 53% on the wire already (500KB → 236KB
+  measured). A transport win, not a blocking-time win.
+- **Font weights.** Declared: 300/400/900 (Monument), 300/400/800 (Neue
+  Machina). Used in CSS: 300/600/700/900 — so 700 is being synthesised from
+  900. Worth reconciling, but it changes rendering.
+- **Hero entrance timing** — the actual mobile LCP lever, and a design call.
