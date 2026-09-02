@@ -1,10 +1,6 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface CountUpProps {
   target: number;
@@ -20,32 +16,41 @@ export function CountUp({
   duration = 2,
 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [triggered, setTriggered] = useState(false);
 
+  // gsap is imported dynamically here, as it is everywhere else in the app.
+  // The static import used to run `gsap.registerPlugin(ScrollTrigger)` at
+  // module scope, which pulled gsap + ScrollTrigger into the entry chunk for
+  // a counter that only animates once it is scrolled into view.
   useEffect(() => {
     if (!ref.current) return;
     const el = ref.current;
     const obj = { value: 0 };
+    let ctx: { revert(): void } | undefined;
 
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top 85%",
-        once: true,
-        onEnter: () => {
-          gsap.to(obj, {
-            value: target,
-            duration,
-            ease: "power2.out",
-            onUpdate: () => {
-              if (el) el.textContent = Math.round(obj.value) + suffix;
+    Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(
+      ([{ gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger);
+        ctx = gsap.context(() => {
+          ScrollTrigger.create({
+            trigger: el,
+            start: "top 85%",
+            once: true,
+            onEnter: () => {
+              gsap.to(obj, {
+                value: target,
+                duration,
+                ease: "power2.out",
+                onUpdate: () => {
+                  if (el) el.textContent = Math.round(obj.value) + suffix;
+                },
+              });
             },
           });
-        },
-      });
-    });
+        });
+      },
+    );
 
-    return () => ctx.revert();
+    return () => ctx?.revert();
   }, [target, suffix, duration]);
 
   return (
