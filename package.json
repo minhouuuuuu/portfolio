@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate:map": "node scripts/generate-dotted-map.mjs"
   },
   "optionalDependencies": {
     "@tailwindcss/oxide-darwin-arm64": "^4.2.2",

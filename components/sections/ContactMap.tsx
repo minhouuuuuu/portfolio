@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { DottedMap, type Marker } from '@/components/ui/DottedMap'
+import { StaticDottedMap } from '@/components/ui/StaticDottedMap'
+import { type Marker } from '@/components/ui/DottedMap'
 import { useLocale } from '@/components/providers/LocaleProvider'
 
 // Two pulsing home bases (relocating Strasbourg → Hanoi); the surrounding
@@ -94,12 +95,13 @@ export function ContactMap() {
           background: 'var(--surface)',
         }}
       >
-        {/* magicui DottedMap, used as documented */}
-        <DottedMap
-          markers={MARKERS}
+        {/* Build-time map (scripts/generate-dotted-map.mjs). Visually
+            identical to <DottedMap markers={MARKERS} pulse /> — which is kept
+            in components/ui as the reference implementation — but one <path>
+            instead of ~1,833 <circle> nodes. */}
+        <StaticDottedMap
           dotColor="var(--text-muted)"
           markerColor="var(--accent)"
-          pulse
         />
 
         {/* Caption strip */}
