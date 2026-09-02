@@ -150,17 +150,93 @@ All 15 markers still pulse, with the same two phase-offset rings each (60
   testing artefact, not a regression — the same class of thing as the
   `BackForwardCacheDisabled` bf-cache failure. Production scores 100.
 
-## Still open (Phase 2)
+## Phase 2 — what was tried, and what survived
 
-Not yet done, in rough order of expected value:
+Phase 1 left desktop at 97-98 with TBT ~9ms, so Phase 2 had at most ~3 points
+to win there. Each change below was measured on desktop and mobile, median of
+3 runs, and reverted if it did not improve the median.
 
-- **Forced reflow, ~252ms**, from layout reads interleaved with writes
-  (likely the Lenis/scroll path). Batch reads before writes and cache
-  measurements across frames.
-- **Static gsap imports** in `hooks/useGSAP.ts`, `components/ui/CountUp.tsx`
-  and `components/ui/MarqueeText.tsx`, where every other call site uses
-  `await import('gsap')`. `MarqueeText` is on the homepage.
-- **Unused JavaScript, ~164KiB.** Affects Speed Index more than TBT, so expect
-  a small gain.
-- **Four font files on first load (161KiB).** Check every weight is used and
-  that subsetting is tight — without disturbing the current CLS.
+| Change | Desktop TBT | Mobile TBT | Verdict |
+|---|---|---|---|
+| gsap dynamic in CountUp/MarqueeText, delete dead useGSAP | 9 → 16ms | 448 → 423ms | **kept** |
+| CustomCursor: load framer-motion only on fine pointers | 16 → 10ms, perf 98 → 97 | 423 → 493ms, perf 64 → 62 | **reverted** |
+| useScrollProgress / useActiveSection: cache layout reads, rAF-throttle | 11ms (flat) | 423 → 462ms | **reverted** |
+
+### Reverted: dynamic framer-motion in CustomCursor
+
+`CustomCursor` imports framer-motion but disables itself on touch devices via
+`matchMedia` — 124KB downloaded and evaluated on phones for a cursor that can
+never appear. Loading the implementation through `next/dynamic` behind the
+pointer check should have removed it from mobile entirely.
+
+It measured worse on both platforms: mobile perf 64 → 62 (TBT 423 → 493ms),
+desktop 98 → 97. The reason is that `Navbar` imports framer-motion too, and
+Navbar is in the layout — so the library loads regardless, and the only net
+effect was an extra chunk and an extra round trip. Removing framer-motion from
+mobile would mean converting Navbar as well, which is a visual-behaviour change
+to a component on the critical path. Not done without asking.
+
+### Reverted: batching layout reads in the scroll hooks
+
+`useActiveSection` called `getBoundingClientRect()` per section on every
+unthrottled scroll event and then setState — textbook layout thrash, and the
+likely source of the 252ms of forced reflow in the original report.
+
+Lighthouse barely scrolls, so it cannot see this. It was measured directly
+instead, with a CDP script that scrolls the full page and back under 4x CPU
+throttling, reading `Layout` / `UpdateLayoutTree` / `RunTask` totals from the
+trace (median of 3):
+
+| | Layout | Style recalc | RunTask total |
+|---|---|---|---|
+| original hooks | 149ms | 1,143ms | 8,718ms |
+| cached + rAF-throttled | 173ms | 1,159ms | 9,205ms |
+
+The rewrite was slightly *worse* on every axis. Lenis already drives scrolling
+through the GSAP ticker, so the handlers were effectively rAF-aligned already;
+the added throttle layer removed nothing and the rect cache saved nothing,
+because those reads were already batched into one pass per scroll event.
+
+Reverted. The lesson generalises: this codebase's scroll path is already
+frame-aligned, so the standard "throttle and cache" advice has nothing left to
+recover here.
+
+### Not attempted, and why
+
+- **WOFF2 conversion.** The fonts are 613KB of uncompressed `.otf` and Next
+  serves them as-is. But `next start` already gzips them and Vercel serves
+  Brotli — measured, the whole set compresses 53% on the wire (500KB → 236KB),
+  so Lighthouse's raw figure overstates the prize. Converting needs `fonttools`
+  or the `woff2` npm package, i.e. a new dependency, which needs sign-off.
+  Worth doing, but it is a transport win, not a blocking-time win.
+- **Dropping font weights.** Declared weights are 300/400/900 (Monument) and
+  300/400/800 (Neue Machina); the CSS uses 300/600/700/900. There is a real
+  mismatch — 700 is synthesised from 900 — but changing the declared set
+  changes rendering, which needs sign-off.
+- **`legacy-javascript`.** No longer reported by Lighthouse on this build; the
+  14KiB in the original report has already gone. No browserslist key is set,
+  and adding one measured nothing to fix.
+
+## Where the remaining points are
+
+Desktop is effectively done: the only imperfect audits left are LCP (1.2s,
+score 0.90) and Speed Index (1.0s, score 0.98), both explicitly out of scope.
+
+**Mobile is a different problem from the one this work fixed.** After Phase 1
+the mobile breakdown is:
+
+| Audit | Weight | Score |
+|---|---|---|
+| largest-contentful-paint (6.0s) | 25 | **0.13** |
+| total-blocking-time (410ms) | 30 | 0.66 |
+| speed-index (4.8s) | 10 | 0.67 |
+
+LCP now dominates, not TBT. And it is not a network problem: every request
+including all four fonts completes by ~1.2s, while LCP lands at 6.0s. The
+~4.8s gap is CPU — the three.js/react-three-fiber hero scene evaluating on a
+4x-throttled mobile CPU. `04.8wcmbi0sj7.js` is 98KB of three.js, 89% of it
+unused on this route.
+
+The fix would be to stop mounting the WebGL hero scene on mobile, or to defer
+it until after LCP. Both touch the hero and the LCP element, so both need
+sign-off before anything is changed.
