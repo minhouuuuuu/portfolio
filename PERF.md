@@ -285,12 +285,58 @@ exchange for nothing.
 applies its own simulated throttling on top; the *ordering* — subtitle last,
 canvas after it — is what matters, and is consistent in both.)
 
-**What would actually move mobile LCP** is shortening the hero entrance
-choreography: the subtitle currently waits 1.2s of timeline before it starts
-fading in. That is a deliberate design decision about how the site feels, not a
-bug, so it is not something to "optimise" unilaterally. Reducing that delay, or
-revealing the subtitle earlier in the sequence, is the lever — and it is a
-design call.
+### Attempted and reverted: CSS-only reveal for the LCP element
+
+Lighthouse's own `lcp-breakdown-insight` confirms the element and the shape of
+the problem:
+
+```
+element: main > section#hero > div.relative > p.hero-anim
+Time to first byte:      24ms
+Element render delay: 1,523ms
+```
+
+1.5s of "render delay" for a paragraph already present in the server-rendered
+HTML — because `.hero-anim` holds it at `opacity:0` until JS has loaded,
+hydrated, and run 1.2s of GSAP timeline.
+
+(On the earlier 2,228ms figure from a raw `PerformanceObserver` vs Lighthouse's
+6.0s: they are different harnesses. Lighthouse applies *simulated* throttling
+on top of the trace, replaying network and CPU at a slower rate; the observer
+run used CDP's *real* 4x CPU throttle. The absolute numbers differ, the
+ordering does not — the subtitle is last in both, and its cost is render delay,
+not network.)
+
+The fix tried: take the subtitle out of the GSAP timeline entirely (out of the
+hide list *and* the `fromTo`, so it cannot be double-animated or reset at
+hydration) and reveal it with a pure CSS `@keyframes` that starts at first
+paint — same 30px travel, same 0.7s, same `expo.out`, same 1.2s offset, plus a
+`prefers-reduced-motion` branch. Verified by sampling computed opacity per
+frame: the subtitle became visible at 2,215ms instead of 2,436ms, with no flash
+and no reset.
+
+It did not move the metric. Interleaved A/B, 5 cycles:
+
+| | perf min/med/max | LCP min/med/max | CLS |
+|---|---|---|---|
+| GSAP timeline | 62 / **63** / 64 | 6,014 / **6,036** / 6,111ms | 0 |
+| CSS keyframe | 61 / **63** / 65 | 6,005 / **6,054** / 6,088ms | 0 |
+
+**Median LCP delta +18ms against 97ms of noise — inside the noise floor.**
+Reverted.
+
+Why it failed is the useful part: after the change, Lighthouse's breakdown no
+longer names the subtitle at all. Freeing that one element simply promoted the
+*next* largest hero element — still GSAP-driven, still waiting on hydration —
+to be the LCP element, inheriting the same delay. **Fixing one element moves
+the label, not the metric.** The LCP will not move until the whole hero
+entrance stops waiting for hydration.
+
+**What would actually move mobile LCP** is therefore the entrance choreography
+as a whole, not any single element: the sequence runs on GSAP, which cannot
+start until the bundle has hydrated. Converting the whole hero entrance to CSS,
+or shortening the sequence, are the real levers — and both are design decisions
+about how the site feels, not optimisations to apply unilaterally.
 
 ## The three.js chunk (`04.8wcmbi0sj7.js`, 97KB, 89% unused)
 
